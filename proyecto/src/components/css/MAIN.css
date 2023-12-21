@@ -1,0 +1,30 @@
+.header{
+    position: fixed;
+    z-index: 1;
+    top: 0%;
+    width: 100%;
+    height: 10%;
+    background-color: #176B87;
+}
+
+.footer{
+    position: fixed;
+    z-index: 1;
+    bottom: 0%;
+    width: 100%;
+    height: 15%;
+    background-color: #000000;
+}
+
+.lg-button{
+    position: absolute;
+    right: 1%;
+    top: 25%;
+    background-color: #176B87;
+    border-color: white;
+}
+
+.lg-button:hover{
+    background-color: white;
+    color: #176B87;
+}
