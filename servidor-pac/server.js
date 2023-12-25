@@ -82,6 +82,50 @@ app.get('/obtener_info_user/:correo', async(req, res) => {
     }
 })
 
+
+app.get('/obtener_regimen/', async(req, res) => {
+    try{
+        const info_user = await pool.query('SELECT DISTINCT tipo_regimen FROM pac.pac_procedimientos');
+        return res.json(info_user.rows);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor' });
+    }
+})
+
+app.get('/obtener_compra/:regimen', async(req, res) => {
+    try{
+        const { regimen } = req.params;
+        const info_user = await pool.query('SELECT DISTINCT tipo_compra FROM pac.pac_procedimientos where tipo_regimen = $1', [regimen]);
+        return res.json(info_user.rows);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor' });
+    }
+})
+
+app.get('/obtener_procedimiento_sugerido/:regimen/:compra', async(req, res) => {
+    try{
+        const { regimen, compra } = req.params;
+        const info_user = await pool.query('SELECT DISTINCT procedimiento_sugerido FROM pac.pac_procedimientos where tipo_regimen = $1 and tipo_compra = $2', [regimen, compra]);
+        return res.json(info_user.rows);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor' });
+    }
+})
+
+app.get('/obtener_tipo_producto/:regimen/:compra/:procSuge', async(req, res) => {
+    try{
+        const { regimen, compra, procSuge } = req.params;
+        const info_user = await pool.query('SELECT DISTINCT tipo_producto FROM pac.pac_procedimientos where tipo_regimen = $1 and tipo_compra = $2 and procedimiento_sugerido = $3', [regimen, compra, procSuge]);
+        return res.json(info_user.rows);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor' });
+    }
+})
+
 app.get('/obtener_departamento_user/:id_departamento', async(req, res) => {
     try{
         const { id_departamento } = req.params;
@@ -162,7 +206,29 @@ app.post('/registrarProceso', async (req, res) => {
 app.get('/obtenerPartidasPresupuestarias/:id_direccion', async (req, res) => {
     try {
         const { id_direccion } = req.params;
-        const partidas = await pool.query('SELECT ppp.id_partida as index, ppp.actividad as opcion FROM pac.pac_partidas_presupuestarias as ppp WHERE id_direccion = $1', [id_direccion]);
+        const partidas = await pool.query('SELECT ppp.codigo_partida as index, ppp.actividad as opcion FROM pac.pac_partidas_presupuestarias as ppp WHERE id_direccion = $1', [id_direccion]);
+        return res.json(partidas.rows);
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.get('/obtenerPartidaPresupuestaria/:codigo_partida', async (req, res) => {
+    try {
+        const { codigo_partida } = req.params;
+        const partidas = await pool.query('SELECT id_partida, codigo_partida, nombre_partida, descripcion_partida, valor_disponible, fecha_actualizacion, id_direccion, actividad, tipo_presupuesto FROM pac.pac_partidas_presupuestarias WHERE codigo_partida = $1', [codigo_partida]);
+        return res.json(partidas.rows);
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.get('/obtenerCPC/:cp_codigo', async (req, res) => {
+    try {
+        const { cp_codigo } = req.params;
+        const partidas = await pool.query('SELECT cp_codigo, cp_descripción FROM pac.pac_cpc WHERE cp_codigo = $1', [cp_codigo]);
         return res.json(partidas.rows);
     } catch (error) {
         console.error(error)
@@ -177,7 +243,7 @@ app.get('/obtener_cpc/', async (req, res) => {
             return res.status(404).json({ message: 'No existen datos' });
         }
         try {
-            const cpc = await pool.query('SELECT * FROM pac.pac_cpc limit 10');
+            const cpc = await pool.query('SELECT cp_codigo as index, cp_descripcion as opcion FROM pac.pac_cpc');
             return res.json(cpc.rows);
         } catch (error) {
             console.error(error);
