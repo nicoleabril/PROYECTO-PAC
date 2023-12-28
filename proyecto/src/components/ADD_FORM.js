@@ -77,7 +77,11 @@ const Add_Form = (props) => {
     const [justificacionTec, setJustificacionTec] = useState('');
     const [justificacionEco, setJustificacionEco] = useState('');
     const [justificacionFortuita, setJustificacionFortuita] = useState('');
-
+    const [objetoContratacion, setObjetoContratacion] = useState('');
+    const [cantidad, setCantidad] = useState('');
+    const [costoUnitario, setCostoUnitario] = useState('');
+    const [fechaPublicacion, setFechaPublicacion] = useState('');
+    const [cuatrimestre, setCuatrimestre] = useState('');
 
     useEffect(() => {
         const obtenerUser = async () => {
@@ -178,6 +182,30 @@ const Add_Form = (props) => {
         obtenerRegimen();
       }, []);
     
+    const determinarCuatrimestre = (selectedDate) => {
+        const month = new Date(selectedDate).getMonth() + 1;
+        const cuatrimestreActual = Math.ceil(month / 3);
+      
+        switch (cuatrimestreActual) {
+          case 1:
+            return '1er cuatrimestre';
+          case 2:
+            return '2do cuatrimestre';
+          case 3:
+            return '3er cuatrimestre';
+          case 4:
+            return '4to cuatrimestre';
+          default:
+            return '';
+        }
+    };
+
+    const handleChangeFechaPublicacion = (event) => {
+        setFechaPublicacion(event.target.value);
+    
+        const cuatrimestre = determinarCuatrimestre(event.target.value);
+        setCuatrimestre(cuatrimestre);
+      };
     
 
     const obtenerCompra = async (regimen) => {
@@ -463,8 +491,17 @@ const Add_Form = (props) => {
                             {seleccionadoRegimen && seleccionadoCompra && seleccionadoProcSuge &&(
                                 <label>{tipoProducto}</label>
                             )}
-                            <br/><label style={etiqueta}>Detalle Producto</label><br/>
-                            <label style={etiqueta}>Cantidad Anual</label><br/>
+                            <br/><label style={etiqueta}>Objeto de Contratación</label><br/>
+                            <textarea
+                                className="form-control"
+                                id="objetoContra"
+                                value={objetoContratacion}
+                                onChange={(e) => setObjetoContratacion(e.target.value)}
+                            />
+                            <label style={etiqueta}>Cantidad</label><br/>
+                            <label>
+                                <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)}/>
+                            </label><br/>
                             <label style={etiqueta}>Unidad</label><br/>
                             <select className="form-control">
                                 <option value="">Selecciona una opción...</option>
@@ -474,9 +511,17 @@ const Add_Form = (props) => {
                                 )}
                             </select>
                             <label style={etiqueta}>Costo Unitario</label><br/>
+                            <label>
+                                <input type="number" value={costoUnitario} onChange={(e) => setCostoUnitario(e.target.value)}/>
+                            </label><br/>
                             <label style={etiqueta}>Total</label><br/>
+                            <label style={etiqueta}>Cuatrimestre</label><br/>
+                            <label >{cuatrimestre}</label><br/>
+                            <label style={etiqueta}>Fecha de Entrega de Documentos Habilitantes</label><br/>
                             <label style={etiqueta}>Fecha Estimada de Publicación</label><br/>
-                            <label style={etiqueta}>Observaciones</label><br/>
+                            <label>
+                                <input type="date" value={fechaPublicacion} onChange={handleChangeFechaPublicacion} />
+                            </label>
                         </div>
                     </form>
                 </div>
