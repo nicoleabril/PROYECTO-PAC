@@ -1,6 +1,8 @@
 import React, { Component, useState, useEffect } from "react";
 import Cookies from 'js-cookie';
 import Axios from 'axios';
+import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 
 const body = {
     position: 'absolute',
@@ -54,8 +56,6 @@ const Add_Form = (props) => {
     const [idDepartamento, setIdDepartamento] = useState('');
     const [idDireccion, setIdDireccion] = useState('');
     const [area, setArea] = useState('');
-    const [mostrarListaPP, setMostrarListaPP] = useState(false);
-    const [mostrarListaCPC, setMostrarListaCPC] = useState(false);
     const fechaActual = new Date();
     const anioActual = fechaActual.getFullYear();
     const [proceso, setProceso] = useState([]);
@@ -69,10 +69,8 @@ const Add_Form = (props) => {
     const [seleccionadoRegimen, setSeleccionadoRegimen] = useState('');
     const [seleccionadoCompra, setSeleccionadoCompra] = useState('');
     const [seleccionadoProcSuge, setSeleccionadoProcSuge] = useState('');
-    const [seleccionadoTipoProducto, setSeleccionadoTipoProducto] = useState('');
+    const [seleccionadoUnidad, setSeleccionadoUnidad] = useState('');
     const [ppEncontrado, setPPEncontrado] = useState([]);
-    const [opcionesFiltradasPP, setOpcionesFiltradasPP] = useState([]);
-    const [opcionesFiltradasCPC, setOpcionesFiltradasCPC] = useState([]);
     const [error, setError] = useState(null);
     const [justificacionTec, setJustificacionTec] = useState('');
     const [justificacionEco, setJustificacionEco] = useState('');
@@ -81,7 +79,9 @@ const Add_Form = (props) => {
     const [cantidad, setCantidad] = useState('');
     const [costoUnitario, setCostoUnitario] = useState('');
     const [fechaPublicacion, setFechaPublicacion] = useState('');
+    const [fechaDocumentos, setFechaDocumentos] = useState('');
     const [cuatrimestre, setCuatrimestre] = useState('');
+    const [total, setTotal] = useState('');
 
     useEffect(() => {
         const obtenerUser = async () => {
@@ -126,30 +126,41 @@ const Add_Form = (props) => {
             }
         };
 
-        obtenerUser();
-        obtenerDepartamento();
-        obtenerDireccion();
-        obtenerProceso();
-        
-    }, [idDepartamento, idDireccion, area, justificacionEco, proceso]);
-
-    useEffect(() => {
         const obtenerPartidasPresupuestarias = async () => {
             try {
                 const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidasPresupuestarias/${idDireccion}`);
                 setPartidasPresu(response.data);
-                setOpcionesFiltradasPP(response.data);
+                
             } catch (error) {
                 console.error('Error al obtener partidas:', error);
                 setError(error);
             }
         };
 
+
+        obtenerUser();
+        obtenerDepartamento();
+        obtenerDireccion();
+        obtenerProceso();
+        obtenerPartidasPresupuestarias();
+        
+    }, [idDepartamento, idDireccion, area, justificacionEco, proceso]);
+
+    useEffect(() => {
+        const calcularTotal = () => {
+            setTotal(cantidad * costoUnitario);
+        };
+
+        calcularTotal();
+
+    }, [cantidad, costoUnitario]);
+    
+    useEffect(() => {
+        
         const obtenerCPC = async () => {
             try {
                 const response = await Axios.get(`http://190.154.254.187:5000/obtener_cpc/`);
                 setProcesosCPC(response.data);
-                setOpcionesFiltradasCPC(response.data);
             } catch (error) {
                 console.error('Error al obtener cpc:', error);
                 setError(error);
@@ -176,7 +187,6 @@ const Add_Form = (props) => {
                 setError(error);
             }
         };
-        obtenerPartidasPresupuestarias();
         obtenerCPC();
         obtenerUnidades();
         obtenerRegimen();
@@ -188,23 +198,63 @@ const Add_Form = (props) => {
       
         switch (cuatrimestreActual) {
           case 1:
-            return '1er cuatrimestre';
+            return 'C1';
           case 2:
-            return '2do cuatrimestre';
+            return 'C2';
           case 3:
-            return '3er cuatrimestre';
+            return 'C3';
           case 4:
-            return '4to cuatrimestre';
+            return 'C4';
           default:
             return '';
         }
     };
+
+    
+    const loadOptions = (inputValue, callback) => {
+        try {
+          // Si no se ha ingresado nada, cargar las opciones predeterminadas
+          if (!inputValue) {
+            callback(opcionesFormateadasCPC.slice(0, 100)); 
+          } else {
+            // Si hay una búsqueda, filtrar las opciones
+            const opciones = filtrarOpciones(inputValue);
+            callback(opciones);
+          }
+        } catch (error) {
+          console.error('Error al cargar opciones:', error);
+          // Manejo de errores si es necesario
+        }
+    };
+
+    const filtrarOpciones = (inputValue) => {
+        // Lógica de filtrado para encontrar opciones coincidentes
+        const opcionesFiltradas = opcionesFormateadasCPC.filter((opcion) =>
+          opcion.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+        return opcionesFiltradas;
+    };
+
+
+    const obtenerFechaDocumentosHabilitantes = (selectedDate) => {
+        const fechaSeleccionada = new Date(selectedDate);
+        fechaSeleccionada.setDate(fechaSeleccionada.getDate() - 30);
+        console.log(fechaSeleccionada);
+        // Formatear la fecha restada como YYYY-MM-DD
+        const fechaRestada = fechaSeleccionada.toISOString().split('T')[0];
+        console.log(fechaRestada);
+        return fechaRestada;
+      };
 
     const handleChangeFechaPublicacion = (event) => {
         setFechaPublicacion(event.target.value);
     
         const cuatrimestre = determinarCuatrimestre(event.target.value);
         setCuatrimestre(cuatrimestre);
+
+        const fecha = obtenerFechaDocumentosHabilitantes(event.target.value);
+        setFechaDocumentos(fecha);
+
       };
     
 
@@ -238,61 +288,82 @@ const Add_Form = (props) => {
         }
     };
 
-    const obtenerPPEncontrado = async (codigo_partida) => {
-        try {
-            const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${codigo_partida}`);
-            setPPEncontrado(response.data[0]);
-        } catch (error) {
-            console.error('Error al obtener partida presupuestaria seleccionada:', error);
-            setError(error);
+    useEffect(() => {
+        const obtenerPPEncontrado = async () => {
+            try {
+                const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${filtroPP}`);
+                setPPEncontrado(response.data[0]);
+            } catch (error) {
+                console.error('Error al obtener partida presupuestaria seleccionada:', error);
+                setError(error);
+            }
+        };
+
+        obtenerPPEncontrado();
+
+    }, [seleccionadoPartidasP]);
+    
+    
+
+    const handleInputChangePartida = (selectedOption) => {
+        if (selectedOption) {
+            setFiltroPP(selectedOption.value);
+            setSeleccionadoPartidasP(selectedOption);
+          } else {
+            setSeleccionadoPartidasP(''); // Maneja el caso en el que se limpie la selección
+            setFiltroPP('');
         }
     };
 
-    const handleInputChangePartida = (e) => {
-        const inputValue = e.target.value;
-        setFiltroPP(inputValue);
-        // Lógica de filtrado aquí
-        const opcionesFiltradasPP = partidasPresu.filter(opcion =>
-            `${opcion.index}: ${opcion.opcion}`.toLowerCase().includes(inputValue.toLowerCase())
-          );
-        setOpcionesFiltradasPP(opcionesFiltradasPP);
-        setMostrarListaPP(true); // Mostrar lista al escribir
-    };
-
-    const handleInputChangeRegimen = (e) => {
-        const inputValue = e.target.value;
-        setSeleccionadoRegimen(inputValue);
+    const handleInputChangeRegimen = (selectedOption) => {
+        const inputValue = selectedOption ? selectedOption.value : null;
+        setSeleccionadoRegimen(selectedOption);
         obtenerCompra(inputValue);
     };
 
-    const handleInputChangeCompra = (e) => {
-        const inputValue = e.target.value;
-        setSeleccionadoCompra(inputValue);
-        obtenerProcSuge(seleccionadoRegimen, inputValue);
+    const handleInputChangeCompra = (selectedOption) => {
+        const inputValue = selectedOption ? selectedOption.value : null;
+        setSeleccionadoCompra(selectedOption);
+        obtenerProcSuge(seleccionadoRegimen.value, inputValue);
         
     };
 
-    const handleInputChangeProce = (e) => {
-        const inputValue = e.target.value;
-        setSeleccionadoProcSuge(inputValue);
-        obtenerTipoProducto(seleccionadoRegimen, seleccionadoCompra, inputValue);
+    const handleInputChangeProce = (selectedOption) => {
+        setSeleccionadoProcSuge(selectedOption); // Actualizar la opción seleccionada
+        // Obtener el valor seleccionado de selectedOption si es necesario
+        const inputValue = selectedOption ? selectedOption.value : null;
+        obtenerTipoProducto(seleccionadoRegimen.value, seleccionadoCompra.value, inputValue);
         
     };
 
-    const handleInputChangeTipoProducto = (e) => {
-        const inputValue = e.target.value;
-        setSeleccionadoTipoProducto(inputValue);
+    const handleInputChangeUnidad = (selectedOption) => {
+        setSeleccionadoUnidad(selectedOption); // Actualizar la opción seleccionada
+        // Obtener el valor seleccionado de selectedOption si es necesario
+        const inputValue = selectedOption ? selectedOption.value : null;
+        
     };
 
-    const handleInputChangeCPC = (e) => {
-        const inputValue = e.target.value;
-        setFiltroCPC(inputValue);
-        // Lógica de filtrado aquí
-        const opcionesFiltradasCPC = procesosCPC.filter(opcion =>
-          `${opcion.index}: ${opcion.opcion}`.toLowerCase().includes(inputValue.toLowerCase())
-        );
-        setOpcionesFiltradasCPC(opcionesFiltradasCPC);
-        setMostrarListaCPC(true); // Mostrar lista al escribir
+
+    const opcionesFormateadasPP = partidasPresu.map((opcion) => ({
+        value: opcion.index,
+        label: `${opcion.index}: ${opcion.opcion}`,
+    }));
+
+    const opcionesFormateadasCPC = procesosCPC.map((opcion) => ({
+        value: opcion.index,
+        label: `${opcion.index}: ${opcion.opcion}`,
+    }
+    ));
+
+
+    const handleInputChangeCPC = (opcion) => {
+        if (opcion) {
+            setFiltroCPC(opcion);
+            setSeleccionadoCPC({ index: `${opcion.value}`, opcion: `${opcion.label}` });
+          } else {
+            setSeleccionadoCPC(''); // Maneja el caso en el que se limpie la selección
+            setFiltroCPC('');
+        }
       };
 
     const regresar_Inicio = () => {
@@ -303,25 +374,92 @@ const Add_Form = (props) => {
         window.location.reload();
     };
 
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+          const response = await Axios.post('http://190.154.254.187:5000/registrarProceso/', {
+            partida: 5657, 
+            anio: '7211200132', 
+            cpc: '7211200132', 
+            tipoCompra: 'fsfsg', 
+            codigoProceso: 'jkfvg', 
+            detalleProducto: 'fsfsg', 
+            cantidadAnual: 1, 
+            estado: 'gdgd', 
+            costoUnitario: 24, 
+            total: 24, 
+            cuatrimestre: 'fsfsg', 
+            fechaEedh: '2005-11-20', 
+            fechaReedh: '2005-11-20', 
+            fechaEstPublic: '2005-11-20', 
+            fechaRealPublic: '2005-11-20', 
+            tipoProducto: 'fsfsg', 
+            catalogoElectronico: 'NO', 
+            procedimeintoSugerido: 'fsfsg', 
+            fondosBid: '7211200132', 
+            codOpePresBid: '7211200132', 
+            codigoProyectoBid: '7211200132', 
+            tipoRegimen: 'fsfsg', 
+            tipoPresupuesto: 'fsfsg', 
+            funcionarioResponsable: 'fsfsg', 
+            directorResponsable: 'fsfsg', 
+            versionProceso: 1, 
+            unidad: 1, 
+            presupuestoPublicado: 1, 
+            observaciones: '7211200132', 
+            revisorCompras: '7211200132', 
+            funcionarioRevisor: '2005-11-20', 
+            fechaUltModif:'2005-11-20', 
+            usrCreacion:'2005-11-20', 
+            usrUltModif:'2005-11-20', 
+            fechaCreacion: '2005-11-20', 
+            direccion: '2005-11-20', 
+            partidaPresupuestaria: 'fsfsg', 
+            pacFasePreparatoriaPK: '150-123', 
+            secuencialResolucion: 3, 
+            eliminado: 'NO', 
+            estadoFasePreparatoria: 'NO INICIADO', 
+            fechaEdp: '2005-11-20', 
+            fechaCpc: '2005-11-20', 
+            fechaRv: '2005-11-20', 
+            fechaSip: '2005-11-20', 
+            fechaExp: '2005-11-20', 
+            fechaElp: '2005-11-20', 
+            fechaSi: '2005-11-20', 
+            fechaRi: '2005-11-20', 
+            fechaFin: '2005-11-20', 
+            revisorJuridico:'7211200132', 
+            idDepartamento: 'G120002', 
+            reqIp: 'NO'
+          });
+
+          console.log('Respuesta del servidor:', response.data);
+          
+        } catch (error) {
+          console.error('Error al enviar datos:', error);
+          
+        }
+    };
+
     return (
         <div style={body}>
             <div>
                 <h1>Incluir Reforma</h1>
                 <div>
-                    <form>
+                    <form onSubmit={handleSubmit}>
                         <div style={encabezaGrupoForm}>
                         <table width="100%">
                             <tr>
                                 <td style={{ width: '80%' }}><label style={etiqueta}>Justificación</label></td>
                                 <td onClick={() => regresar_Inicio()} style={{ width: '10%' }}>Regresar</td>
-                                <td onClick={() => cancelar()} style={{ width: '10%' }}>Cancelar</td>
+                                <td style={{ width: '10%' }}><button type="submit">Guardar</button></td>
                             </tr>
                         </table>
                         </div>  
                         <div className="form-group" style={grupoForm}>
                             <table width="100%">
                                 <tr>
-                                    <td style={{ width: '15%' }}><label style={etiqueta}>Área Requiriente:</label></td>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Área Requiriente:</label></td>
                                     <td style={{ width: '15%' }}><label>{area}</label></td>
                                     <td style={{ width: '40%' }}></td>
                                     <td style={{ width: '15%', textAlign: 'right' }}><label style={etiqueta}>Año:</label></td>
@@ -363,165 +501,175 @@ const Add_Form = (props) => {
                         <div className="form-group" style={grupoForm}>
                         <table width="100%">
                             <tr>
-                                <td style={{ width: '20%' }}><label style={etiqueta}>Partida Presupuestaria</label></td>
+                                <td style={{ width: '25%' }}><label style={etiqueta}>Partida Presupuestaria</label></td>
                                 <td style={{ width: '70%' }}>
-                                <input
-                                    className="form-control"
-                                    type="text"
-                                    value={filtroPP}
+                                <Select
+                                    value={seleccionadoPartidasP}
                                     onChange={handleInputChangePartida}
+                                    options={opcionesFormateadasPP}
+                                    isClearable
                                     placeholder="Seleccione una opción..."
+                                    noOptionsMessage={() => 'No se encontraron opciones'}
                                 />
                                 </td>
                             </tr>
-                        </table>
-                                    {mostrarListaPP && (
-                                        <ul>
-                                            {opcionesFiltradasPP.map((opcion, index) => (
-                                                <li
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setSeleccionadoPartidasP(`${opcion.index} - ${opcion.opcion}`);
-                                                        setMostrarListaPP(false);
-                                                        setFiltroPP(`${opcion.index}: ${opcion.opcion}`);
-                                                        obtenerPPEncontrado(opcion.index);
-                                                    }}
-                                                >
-                                                    {opcion.index}: {opcion.opcion}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        
-                                    )}
-                                    
-                                    {seleccionadoPartidasP && (
-                                        //<td style={{ width: '10%' }}><button style={BotonCircular}>Guardar</button></td></tr>
-                                        <div>
-                                            <p>Opción seleccionada: {seleccionadoPartidasP}</p>
-                                            <table width="100%">
-                                                <tr>
-                                                    <td style={{ width: '10%' }}><label style={etiqueta}>Código Partida</label></td>
-                                                    <td style={{ width: '20%' }}><label>{ppEncontrado.codigo_partida}</label></td>
-                                                    <td style={{ width: '10%' }}></td>
-                                                    <td style={{ width: '30%' }}><label style={etiqueta}>Presupuesto</label></td>
-                                                    <td style={{ width: '20%' }}><label>{ppEncontrado.valor_disponible}</label></td>
-                                                </tr>
-                                                <tr>
-                                                    <td style={{ width: '20%' }}><label style={etiqueta}>Actividad</label></td>
-                                                    <td style={{ width: '70%' }}><label>{ppEncontrado.actividad}</label></td>
-                                                </tr>
-                                                <tr>
-                                                    <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Presupuesto</label></td>
-                                                    <td style={{ width: '70%' }}><label>{ppEncontrado.tipo_presupuesto}</label></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        
-                                    )}
-                            <table width="100%">
+                            
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Código Partida</label></td>
+                                    <td style={{ width: '20%' }}><label>{ppEncontrado.codigo_partida}</label></td>
+                                    <td style={{ width: '50%' }}><label style={etiqueta}>Presupuesto</label></td>
+                                    <td style={{ width: '10%' }}><label>{ppEncontrado.valor_disponible}</label></td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Actividad</label></td>
+                                    <td style={{ width: '70%' }}><label>{ppEncontrado.actividad}</label></td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Presupuesto</label></td>
+                                    <td style={{ width: '70%' }}><label>{ppEncontrado.tipo_presupuesto}</label></td>
+                                </tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>CPC</label></td>
                                     <td style={{ width: '70%' }}>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        value={filtroCPC}
-                                        onChange={handleInputChangeCPC}
-                                        placeholder="Seleccione una opción..."
-                                    />
+                                        <AsyncSelect
+                                            value={filtroCPC}
+                                            defaultOptions={opcionesFormateadasCPC.slice(0, 100)}
+                                            onChange={handleInputChangeCPC}
+                                            loadOptions={loadOptions}
+                                            isClearable
+                                            placeholder="Seleccione una opción..."
+                                            noOptionsMessage={() => 'No se encontraron opciones'}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Descripción CPC</label></td>
+                                    <td style={{ width: '70%' }}><label>{seleccionadoCPC.opcion}</label></td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Régimen</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <Select
+                                                value={seleccionadoRegimen}
+                                                onChange={handleInputChangeRegimen}
+                                                options={regimen.map((option) => ({
+                                                value: option.tipo_regimen,
+                                                label: option.tipo_regimen,
+                                                }))}
+                                                placeholder="Selecciona una opción..."
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Compra</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        {seleccionadoRegimen && (
+                                            <Select
+                                                value={seleccionadoCompra}
+                                                onChange={handleInputChangeCompra}
+                                                options={compra.map((option) => ({
+                                                value: option.tipo_compra,
+                                                label: option.tipo_compra,
+                                                }))}
+                                                placeholder="Selecciona una opción..."
+                                            />
+                                        )}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Procedimiento Sugerido</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        {seleccionadoRegimen && seleccionadoCompra && (
+                                            <Select
+                                                value={seleccionadoProcSuge}
+                                                onChange={handleInputChangeProce}
+                                                options={procSuge.map((option) => ({
+                                                value: option.procedimiento_sugerido,
+                                                label: option.procedimiento_sugerido,
+                                                }))}
+                                                placeholder="Selecciona una opción..."
+                                            />
+                                        )}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Producto</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        {seleccionadoRegimen && seleccionadoCompra && seleccionadoProcSuge &&(
+                                            <label>{tipoProducto}</label>
+                                        )}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Objeto de Contratación</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <textarea
+                                            className="form-control"
+                                            id="objetoContra"
+                                            value={objetoContratacion}
+                                            onChange={(e) => setObjetoContratacion(e.target.value)}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Cantidad</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <label>
+                                            <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)}/>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Unidad</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <Select
+                                                value={seleccionadoUnidad}
+                                                onChange={handleInputChangeUnidad}
+                                                options={unidades.map((elemento) => ({
+                                                value: elemento.id,
+                                                label: elemento.unidad,
+                                                }))}
+                                                placeholder="Selecciona una opción..."
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Costo Unitario</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <label>
+                                            <input type="number" value={costoUnitario} onChange={(e) => setCostoUnitario(e.target.value)}/>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Total</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        {cantidad && costoUnitario && (
+                                            <label>{total}</label>
+                                        )}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Cuatrimestre</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <label >{cuatrimestre}</label><br/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Fecha de Entrega de Documentos Habilitantes</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <label >{fechaDocumentos}</label><br/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{ width: '20%' }}><label style={etiqueta}>Fecha Estimada de Publicación</label></td>
+                                    <td style={{ width: '70%' }}>
+                                        <label>
+                                            <input type="date" value={fechaPublicacion} onChange={handleChangeFechaPublicacion} />
+                                        </label>
                                     </td>
                                 </tr>
                             </table>
-                                {mostrarListaCPC && (
-                                    <ul>
-                                        {opcionesFiltradasCPC.map((opcion, index) => (
-                                            <li
-                                                key={index}
-                                                onClick={() => {
-                                                    setSeleccionadoCPC(`${opcion.index}: ${opcion.opcion}`);
-                                                    setMostrarListaCPC(false);
-                                                    setFiltroCPC(`${opcion.index}: ${opcion.opcion}`);
-                                                }}
-                                            >
-                                                {opcion.index}: {opcion.opcion}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {seleccionadoCPC && (
-                                    <div>
-                                        <p>Opción seleccionada: {seleccionadoCPC}</p>
-                                        <table width="100%">
-                                                <tr>
-                                                    <td style={{ width: '20%' }}><label style={etiqueta}>Descripción CPC</label></td>
-                                                    <td style={{ width: '70%' }}><label>{seleccionadoCPC}</label></td>
-                                                </tr>
-                                        </table>
-                                    </div>
-                                )}
-                            <label style={etiqueta}>Tipo Régimen</label><br/>
-                            <select value={seleccionadoRegimen} onChange={handleInputChangeRegimen} className="form-control">
-                                <option value="">Selecciona una opción...</option>
-                                {regimen.map((option, index) =>(
-                                    <option key={index} value={option.tipo_regimen}>{option.tipo_regimen}</option>
-                                )
-                                )}
-                            </select>
-                            <label style={etiqueta}>Tipo Compra</label><br/>
-                            {seleccionadoRegimen && (
-                                <select value={seleccionadoCompra} onChange={handleInputChangeCompra} className="form-control">
-                                    <option value="">Selecciona una opción...</option>
-                                    {compra.map((option, index) =>(
-                                        <option key={index} value={option.tipo_compra}>{option.tipo_compra}</option>
-                                    )
-                                    )}
-                                </select>
-                            )}
-                            <label style={etiqueta}>Procedimiento Sugerido</label><br/>
-                            {seleccionadoRegimen && seleccionadoCompra && (
-                                <select value={seleccionadoProcSuge} onChange={handleInputChangeProce} className="form-control">
-                                    <option value="">Selecciona una opción...</option>
-                                    {procSuge.map((option, index) =>(
-                                        <option key={index} value={option.procedimiento_sugerido}>{option.procedimiento_sugerido}</option>
-                                    )
-                                    )}
-                                </select>
-                            )}
-                            <label style={etiqueta}>Tipo Producto</label><br/>
-                            {seleccionadoRegimen && seleccionadoCompra && seleccionadoProcSuge &&(
-                                <label>{tipoProducto}</label>
-                            )}
-                            <br/><label style={etiqueta}>Objeto de Contratación</label><br/>
-                            <textarea
-                                className="form-control"
-                                id="objetoContra"
-                                value={objetoContratacion}
-                                onChange={(e) => setObjetoContratacion(e.target.value)}
-                            />
-                            <label style={etiqueta}>Cantidad</label><br/>
-                            <label>
-                                <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)}/>
-                            </label><br/>
-                            <label style={etiqueta}>Unidad</label><br/>
-                            <select className="form-control">
-                                <option value="">Selecciona una opción...</option>
-                                {unidades.map(elemento =>(
-                                    <option key={elemento.id} value={elemento.id}>{elemento.unidad}</option>
-                                )
-                                )}
-                            </select>
-                            <label style={etiqueta}>Costo Unitario</label><br/>
-                            <label>
-                                <input type="number" value={costoUnitario} onChange={(e) => setCostoUnitario(e.target.value)}/>
-                            </label><br/>
-                            <label style={etiqueta}>Total</label><br/>
-                            <label style={etiqueta}>Cuatrimestre</label><br/>
-                            <label >{cuatrimestre}</label><br/>
-                            <label style={etiqueta}>Fecha de Entrega de Documentos Habilitantes</label><br/>
-                            <label style={etiqueta}>Fecha Estimada de Publicación</label><br/>
-                            <label>
-                                <input type="date" value={fechaPublicacion} onChange={handleChangeFechaPublicacion} />
-                            </label>
                         </div>
                     </form>
                 </div>
