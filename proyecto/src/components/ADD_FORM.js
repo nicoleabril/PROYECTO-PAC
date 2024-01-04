@@ -12,6 +12,11 @@ const body = {
 
 };
 
+const mensaje_Error = {
+    color: '#FF0000',
+    fontWeight: 'bold'
+};
+
 const BotonCircular =  {
     borderRadius: '0%',
     width: '120px',
@@ -52,6 +57,7 @@ const Add_Form = (props) => {
     const [regimen, setTipoRegimen] = useState([]);
     const [compra, setCompra] = useState([]);
     const [procSuge, setProcedimientoSugerido] = useState([]);
+    const [id_proceso, setIDProceso] = useState('');
     const [tipoProducto, setTipoProducto] = useState('');
     const [idDepartamento, setIdDepartamento] = useState('');
     const [idDireccion, setIdDireccion] = useState('');
@@ -82,6 +88,11 @@ const Add_Form = (props) => {
     const [fechaDocumentos, setFechaDocumentos] = useState('');
     const [cuatrimestre, setCuatrimestre] = useState('');
     const [total, setTotal] = useState('');
+    const [mensajeError, setMensajeError] = useState({
+        mensaje_justificacionTec: '',mensaje_justificacionEco: '',mensaje_justificacionFortuita: '',mensaje_seleccionadoPartidasP:'', mensaje_seleccionadoCPC:'',
+        mensaje_seleccionadoRegimen:'', mensaje_seleccionadoCompra:'', mensaje_seleccionadoProc:'', mensaje_objetoContr:'', mensaje_cantidad:'', mensaje_unidad:'',
+        mensaje_costo:'', mensaje_fecha_estimada:'',
+    });
 
     useEffect(() => {
         const obtenerUser = async () => {
@@ -96,11 +107,10 @@ const Add_Form = (props) => {
 
         const obtenerDepartamento = async () => {
             try {
-                console.log(idDepartamento);
                 const response = await Axios.get(`http://190.154.254.187:5000/obtener_departamento_user/${idDepartamento}`);
                 setIdDireccion(response.data[0].id_direccion);
             } catch (error) {
-                console.error('Error al obtener procesos:', error);
+                console.error('Error al obtener departamento:', error);
                 setError(error);
             }
         }
@@ -110,21 +120,10 @@ const Add_Form = (props) => {
                 const response = await Axios.get(`http://190.154.254.187:5000/obtener_direccion_departamento/${idDireccion}`);
                 setArea(response.data[0].nombre_direccion);
             } catch (error) {
-                console.error('Error al obtener procesos:', error);
+                console.error('Error al obtener direccion:', error);
                 setError(error);
             }
         }
-
-        const obtenerProceso = async () => {
-            try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtener_proceso/${props.idProceso}`);
-                setProceso(response.data);
-                setJustificacionEco(response.data[0].año);
-            } catch (error) {
-                console.error('Error al obtener procesos:', error);
-                setError(error);
-            }
-        };
 
         const obtenerPartidasPresupuestarias = async () => {
             try {
@@ -137,14 +136,12 @@ const Add_Form = (props) => {
             }
         };
 
-
         obtenerUser();
         obtenerDepartamento();
         obtenerDireccion();
-        obtenerProceso();
         obtenerPartidasPresupuestarias();
         
-    }, [idDepartamento, idDireccion, area, justificacionEco, proceso]);
+    }, [idDepartamento, idDireccion] );
 
     useEffect(() => {
         const calcularTotal = () => {
@@ -207,6 +204,17 @@ const Add_Form = (props) => {
             return 'C4';
           default:
             return '';
+        }
+    };
+
+    const obtenerIDProceso = async () => {
+        try {
+            const response = await Axios.get(`http://190.154.254.187:5000/obtener_id_proceso/`);
+            console.log(response.data.nextval+'dhbdh')
+            setIDProceso(response.data.nextval);
+        } catch (error) {
+            console.error('Error al obtener procesos:', error);
+            setError(error);
         }
     };
 
@@ -343,6 +351,14 @@ const Add_Form = (props) => {
         
     };
 
+    function verificarCatalogoElectronico(variable) {
+        if (variable === 'CATALOGO ELECTRONICO') {
+          return 'SI';
+        } else {
+          return 'NO';
+        }
+    }
+      
 
     const opcionesFormateadasPP = partidasPresu.map((opcion) => ({
         value: opcion.index,
@@ -361,7 +377,7 @@ const Add_Form = (props) => {
             setFiltroCPC(opcion);
             setSeleccionadoCPC({ index: `${opcion.value}`, opcion: `${opcion.label}` });
           } else {
-            setSeleccionadoCPC(''); // Maneja el caso en el que se limpie la selección
+            setSeleccionadoCPC(''); 
             setFiltroCPC('');
         }
       };
@@ -375,69 +391,135 @@ const Add_Form = (props) => {
     };
 
     const handleSubmit = async (event) => {
+        const errores= {
+            mensaje_justificacionTec: '',mensaje_justificacionEco: '',mensaje_justificacionFortuita: '',mensaje_seleccionadoPartidasP:'', mensaje_seleccionadoCPC:'',
+            mensaje_seleccionadoRegimen:'', mensaje_seleccionadoCompra:'', mensaje_seleccionadoProc:'', mensaje_objetoContr:'', mensaje_cantidad:'', mensaje_unidad:'',
+            mensaje_costo:'', mensaje_fecha_estimada:'',
+        };
         event.preventDefault();
-        try {
-          const response = await Axios.post('http://190.154.254.187:5000/registrarProceso/', {
-            partida: 5657, 
-            anio: '7211200132', 
-            cpc: '7211200132', 
-            tipoCompra: 'fsfsg', 
-            codigoProceso: 'jkfvg', 
-            detalleProducto: 'fsfsg', 
-            cantidadAnual: 1, 
-            estado: 'gdgd', 
-            costoUnitario: 24, 
-            total: 24, 
-            cuatrimestre: 'fsfsg', 
-            fechaEedh: '2005-11-20', 
-            fechaReedh: '2005-11-20', 
-            fechaEstPublic: '2005-11-20', 
-            fechaRealPublic: '2005-11-20', 
-            tipoProducto: 'fsfsg', 
-            catalogoElectronico: 'NO', 
-            procedimeintoSugerido: 'fsfsg', 
-            fondosBid: '7211200132', 
-            codOpePresBid: '7211200132', 
-            codigoProyectoBid: '7211200132', 
-            tipoRegimen: 'fsfsg', 
-            tipoPresupuesto: 'fsfsg', 
-            funcionarioResponsable: 'fsfsg', 
-            directorResponsable: 'fsfsg', 
-            versionProceso: 1, 
-            unidad: 1, 
-            presupuestoPublicado: 1, 
-            observaciones: '7211200132', 
-            revisorCompras: '7211200132', 
-            funcionarioRevisor: '2005-11-20', 
-            fechaUltModif:'2005-11-20', 
-            usrCreacion:'2005-11-20', 
-            usrUltModif:'2005-11-20', 
-            fechaCreacion: '2005-11-20', 
-            direccion: '2005-11-20', 
-            partidaPresupuestaria: 'fsfsg', 
-            pacFasePreparatoriaPK: '150-123', 
-            secuencialResolucion: 3, 
-            eliminado: 'NO', 
-            estadoFasePreparatoria: 'NO INICIADO', 
-            fechaEdp: '2005-11-20', 
-            fechaCpc: '2005-11-20', 
-            fechaRv: '2005-11-20', 
-            fechaSip: '2005-11-20', 
-            fechaExp: '2005-11-20', 
-            fechaElp: '2005-11-20', 
-            fechaSi: '2005-11-20', 
-            fechaRi: '2005-11-20', 
-            fechaFin: '2005-11-20', 
-            revisorJuridico:'7211200132', 
-            idDepartamento: 'G120002', 
-            reqIp: 'NO'
-          });
-
-          console.log('Respuesta del servidor:', response.data);
-          
-        } catch (error) {
-          console.error('Error al enviar datos:', error);
-          
+        let formValido = true;
+        if (!justificacionTec.trim()) {
+            errores.mensaje_justificacionTec ='*Ingrese justificación técnica';
+            formValido = false;
+        }
+        if (!justificacionEco.trim()) {
+            errores.mensaje_justificacionEco = '*Ingrese justificación económica';
+            formValido = false;
+        }
+        if (!justificacionFortuita.trim()) {
+            errores.mensaje_justificacionFortuita = ('*Ingrese justificación caso fortuito o fuerza mayor');
+            formValido = false;
+        }
+        if (!seleccionadoPartidasP) {
+            errores.mensaje_seleccionadoPartidasP = ('*Seleccione partida presupuestaria');
+            formValido = false;
+        }
+        if (!seleccionadoCPC) {
+            errores.mensaje_seleccionadoCPC = ('*Seleccione CPC');
+            formValido = false;
+        }
+        if (!seleccionadoRegimen) {
+            errores.mensaje_seleccionadoRegimen = ('*Seleccione régimen');
+            formValido = false;
+        }
+        if (!seleccionadoCompra) {
+            errores.mensaje_seleccionadoCompra = ('*Seleccione compra');
+            formValido = false;
+        }
+        if (!seleccionadoProcSuge) {
+            errores.mensaje_seleccionadoProc = ('*Seleccione procedimiento sugerido');
+            formValido = false;
+        }
+        if (!seleccionadoUnidad) {
+            errores.mensaje_unidad = ('*Seleccione unidad');
+            formValido = false;
+        }
+        if (!objetoContratacion.trim()) {
+            errores.mensaje_objetoContr = ('*Ingrese objeto de contratación');
+            formValido = false;
+        }
+        if (!cantidad.trim()) {
+            errores.mensaje_cantidad = ('*Ingrese cantidad de producto');
+            formValido = false;
+        }
+        if (!costoUnitario.trim()) {
+            errores.mensaje_costo = ('*Ingrese costo unitario de producto');
+            formValido = false;
+        }
+        if (!fechaPublicacion.trim()) {
+            errores.mensaje_fecha_estimada = ('*Ingrese fecha estimada de publicación');
+            formValido = false;
+        }
+        if(!formValido){
+            setMensajeError(errores);
+        }
+        if(formValido){
+            obtenerIDProceso();
+            setMensajeError([]);
+            try {
+              const response = await Axios.post('http://190.154.254.187:5000/registrarProceso/', {
+                proceso: id_proceso,
+                partida: ppEncontrado.id_partida, 
+                anio: anioActual, 
+                cpc: filtroCPC.value, 
+                tipoCompra: seleccionadoCompra.value, 
+                codigoProceso: null, 
+                detalleProducto: objetoContratacion, 
+                cantidadAnual: cantidad, 
+                estado: 'NO INICIADO', 
+                costoUnitario: costoUnitario, 
+                total: total, 
+                cuatrimestre: cuatrimestre, 
+                fechaEedh: fechaDocumentos, 
+                fechaReedh: null, 
+                fechaEstPublic: fechaPublicacion, 
+                fechaRealPublic: null, 
+                tipoProducto: tipoProducto, 
+                catalogoElectronico: verificarCatalogoElectronico(seleccionadoProcSuge.value), 
+                procedimeintoSugerido: seleccionadoProcSuge.value, 
+                fondosBid: null, 
+                codOpePresBid: null, 
+                codigoProyectoBid: null, 
+                tipoRegimen: seleccionadoRegimen.value, 
+                tipoPresupuesto: ppEncontrado.tipo_presupuesto, 
+                funcionarioResponsable: 'Esto es una prueba', 
+                directorResponsable: 'Esto es una prueba', 
+                versionProceso: 1, 
+                unidad: seleccionadoUnidad.label, 
+                presupuestoPublicado: null, 
+                observaciones: null, 
+                revisorCompras: 'Esto es una prueba', 
+                funcionarioRevisor: 'Esto es una prueba', 
+                fechaUltModif:null, 
+                usrCreacion: user, 
+                usrUltModif: null, 
+                fechaCreacion: fechaActual, 
+                direccion: area, 
+                partidaPresupuestaria: ppEncontrado.codigo_partida, 
+                pacFasePreparatoriaPK: id_proceso+'-'+1, 
+                secuencialResolucion: null, 
+                eliminado: 'NO', 
+                estadoFasePreparatoria: 'NO INICIADO', 
+                fechaEdp: null, 
+                fechaCpc: null, 
+                fechaRv: null, 
+                fechaSip: null, 
+                fechaExp: null, 
+                fechaElp: null, 
+                fechaSi: null, 
+                fechaRi: null, 
+                fechaFin: null, 
+                revisorJuridico:null, 
+                idDepartamento: idDepartamento, 
+                reqIp: 'NO'
+              });
+    
+              console.log('Respuesta del servidor:', response.data);
+              
+            } catch (error) {
+              console.error('Error al enviar datos:', error);
+              
+            }
         }
     };
 
@@ -476,6 +558,7 @@ const Add_Form = (props) => {
                                 onChange={(e) => setJustificacionTec(e.target.value)}
                                 placeholder="MOTIVAR LA RAZON TÉCNICA DEL PORQUE SE INCLUYE, CANCELA O MODIFICA EL PAC."
                             />
+                            <p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_justificacionTec}</p>
                             <label style={etiqueta}>Justificación Económica</label>
                             <textarea
                             placeholder="MOTIVAR LA RAZON ECONÓMICA DEL PORQUE SE INCLUYE, CANCELA O MODIFICA EL PAC (En caso de no aplicar señalar los motivos por los cuales no impact al presupuesto)."
@@ -485,6 +568,7 @@ const Add_Form = (props) => {
                                 onChange={(e) => setJustificacionEco(e.target.value)}
                                 
                             />
+                            <p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_justificacionEco}</p>
                             <label style={etiqueta}>Justificación Caso Fortuito / Fuerza mayor</label>
                             <textarea
                                 type="text"
@@ -494,26 +578,27 @@ const Add_Form = (props) => {
                                 onChange={(e) => setJustificacionFortuita(e.target.value)}
                                 placeholder="MOTIVAR LA RAZON DEL PORQUE SE INCLUYE, CANCELA O MODIFICA EL PAC (Este punto solo aplica para caso fortuito o fuerza mayor, caso contrario señalar &quot;No Aplica&quot;)"
                             />
+                            <p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_justificacionFortuita}</p>
                         </div>
                         <br />
                         <br />
                         <div style={encabezaGrupoForm}>Solicitud Reformas</div>
                         <div className="form-group" style={grupoForm}>
-                        <table width="100%">
-                            <tr>
-                                <td style={{ width: '25%' }}><label style={etiqueta}>Partida Presupuestaria</label></td>
-                                <td style={{ width: '70%' }}>
-                                <Select
-                                    value={seleccionadoPartidasP}
-                                    onChange={handleInputChangePartida}
-                                    options={opcionesFormateadasPP}
-                                    isClearable
-                                    placeholder="Seleccione una opción..."
-                                    noOptionsMessage={() => 'No se encontraron opciones'}
-                                />
-                                </td>
-                            </tr>
-                            
+                            <table width="100%">
+                                <tr>
+                                    <td style={{ width: '25%' }}><label style={etiqueta}>Partida Presupuestaria</label></td>
+                                    <td style={{ width: '70%' }}>
+                                    <Select
+                                        value={seleccionadoPartidasP}
+                                        onChange={handleInputChangePartida}
+                                        options={opcionesFormateadasPP}
+                                        isClearable
+                                        placeholder="Seleccione una opción..."
+                                        noOptionsMessage={() => 'No se encontraron opciones'}
+                                    />
+                                    </td>
+                                </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_seleccionadoPartidasP}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Código Partida</label></td>
                                     <td style={{ width: '20%' }}><label>{ppEncontrado.codigo_partida}</label></td>
@@ -542,6 +627,7 @@ const Add_Form = (props) => {
                                         />
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_seleccionadoCPC}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Descripción CPC</label></td>
                                     <td style={{ width: '70%' }}><label>{seleccionadoCPC.opcion}</label></td>
@@ -560,6 +646,7 @@ const Add_Form = (props) => {
                                         />
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_seleccionadoRegimen}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Compra</label></td>
                                     <td style={{ width: '70%' }}>
@@ -576,6 +663,7 @@ const Add_Form = (props) => {
                                         )}
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_seleccionadoCompra}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Procedimiento Sugerido</label></td>
                                     <td style={{ width: '70%' }}>
@@ -592,6 +680,7 @@ const Add_Form = (props) => {
                                         )}
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_seleccionadoProc}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Tipo Producto</label></td>
                                     <td style={{ width: '70%' }}>
@@ -611,6 +700,7 @@ const Add_Form = (props) => {
                                         />
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_objetoContr}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Cantidad</label></td>
                                     <td style={{ width: '70%' }}>
@@ -619,6 +709,7 @@ const Add_Form = (props) => {
                                         </label>
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_cantidad}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Unidad</label></td>
                                     <td style={{ width: '70%' }}>
@@ -633,6 +724,7 @@ const Add_Form = (props) => {
                                         />
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_unidad}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Costo Unitario</label></td>
                                     <td style={{ width: '70%' }}>
@@ -641,6 +733,7 @@ const Add_Form = (props) => {
                                         </label>
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_costo}</p></td></tr>
                                 <tr>
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Total</label></td>
                                     <td style={{ width: '70%' }}>
@@ -669,6 +762,7 @@ const Add_Form = (props) => {
                                         </label>
                                     </td>
                                 </tr>
+                                <tr><td colspan="3"><p className="mensaje-validacion" style={mensaje_Error}>{mensajeError.mensaje_fecha_estimada}</p></td></tr>
                             </table>
                         </div>
                     </form>
