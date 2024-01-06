@@ -64,7 +64,6 @@ const Add_Form = (props) => {
     const [area, setArea] = useState('');
     const fechaActual = new Date();
     const anioActual = fechaActual.getFullYear();
-    const [proceso, setProceso] = useState([]);
     const [partidasPresu, setPartidasPresu] = useState([]);
     const [procesosCPC, setProcesosCPC] = useState([]);
     const [unidades, setUnidades] = useState([]);
@@ -88,6 +87,8 @@ const Add_Form = (props) => {
     const [fechaDocumentos, setFechaDocumentos] = useState('');
     const [cuatrimestre, setCuatrimestre] = useState('');
     const [total, setTotal] = useState('');
+    const [directorResponsable, setdirectorResponsable] = useState('');
+    const [funcionario_revisor, setFuncionarioRevisor] = useState('');
     const [mensajeError, setMensajeError] = useState({
         mensaje_justificacionTec: '',mensaje_justificacionEco: '',mensaje_justificacionFortuita: '',mensaje_seleccionadoPartidasP:'', mensaje_seleccionadoCPC:'',
         mensaje_seleccionadoRegimen:'', mensaje_seleccionadoCompra:'', mensaje_seleccionadoProc:'', mensaje_objetoContr:'', mensaje_cantidad:'', mensaje_unidad:'',
@@ -95,57 +96,49 @@ const Add_Form = (props) => {
     });
 
     useEffect(() => {
-        const obtenerUser = async () => {
+        const obtenerDatos = async () => {
             try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtener_info_user/${user}`);
-                setIdDepartamento(response.data[0].depar_usuario);
-            } catch (error) {
-                console.error('Error al obtener procesos:', error);
-                setError(error);
-            }
-        }
+                const userResponse = await Axios.get(`http://190.154.254.187:5000/obtener_info_user/${user}`);
+                const idDepartamento = userResponse.data[0].depar_usuario;
+    
+                const departamentoResponse = await Axios.get(`http://190.154.254.187:5000/obtener_departamento_user/${idDepartamento}`);
+                const idDireccion = departamentoResponse.data[0].id_direccion;
+                const funcionarioRevisorID = departamentoResponse.data[0].id_superior;
+    
+                const direccionResponse = await Axios.get(`http://190.154.254.187:5000/obtener_direccion_departamento/${idDireccion}`);
+                const directorResponsableID = direccionResponse.data[0].id_superior;
+                const area = direccionResponse.data[0].nombre_direccion;
+    
+                const partidasResponse = await Axios.get(`http://190.154.254.187:5000/obtenerPartidasPresupuestarias/${idDireccion}`);
+                const partidasPresu = partidasResponse.data;
 
-        const obtenerDepartamento = async () => {
-            try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtener_departamento_user/${idDepartamento}`);
-                setIdDireccion(response.data[0].id_direccion);
-            } catch (error) {
-                console.error('Error al obtener departamento:', error);
-                setError(error);
-            }
-        }
+                const directorResponse = await Axios.get(`http://190.154.254.187:5000/obtener_info_user_dado_ID/${directorResponsableID}`);
+                const directorResponsable = directorResponse.data[0].correo_usuario;
 
-        const obtenerDireccion = async () => {
-            try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtener_direccion_departamento/${idDireccion}`);
-                setArea(response.data[0].nombre_direccion);
+                const funcionarioResponse = await Axios.get(`http://190.154.254.187:5000/obtener_info_user_dado_ID/${funcionarioRevisorID}`);
+                const funcionarioRevisor = funcionarioResponse.data[0].correo_usuario;
+    
+                // Usar los datos obtenidos
+                setIdDepartamento(idDepartamento);
+                setIdDireccion(idDireccion)
+                setArea(area);
+                setPartidasPresu(partidasPresu);
+                setdirectorResponsable(directorResponsable);
+                setFuncionarioRevisor(funcionarioRevisor);
+                // ... establecer otros estados según sea necesario
             } catch (error) {
-                console.error('Error al obtener direccion:', error);
-                setError(error);
-            }
-        }
-
-        const obtenerPartidasPresupuestarias = async () => {
-            try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidasPresupuestarias/${idDireccion}`);
-                setPartidasPresu(response.data);
-                
-            } catch (error) {
-                console.error('Error al obtener partidas:', error);
+                console.error('Error al obtener datos:', error);
                 setError(error);
             }
         };
-
-        obtenerUser();
-        obtenerDepartamento();
-        obtenerDireccion();
-        obtenerPartidasPresupuestarias();
-        
-    }, [idDepartamento, idDireccion] );
+    
+        obtenerDatos();
+    }, [user]);
+    
 
     useEffect(() => {
         const calcularTotal = () => {
-            setTotal(cantidad * costoUnitario);
+            setTotal(cantidad * parseFloat(costoUnitario));
         };
 
         calcularTotal();
@@ -187,7 +180,7 @@ const Add_Form = (props) => {
         obtenerCPC();
         obtenerUnidades();
         obtenerRegimen();
-      }, []);
+    }, []);
     
     const determinarCuatrimestre = (selectedDate) => {
         const month = new Date(selectedDate).getMonth() + 1;
@@ -210,7 +203,7 @@ const Add_Form = (props) => {
     const obtenerIDProceso = async () => {
         try {
             const response = await Axios.get(`http://190.154.254.187:5000/obtener_id_proceso/`);
-            console.log(response.data.nextval+'dhbdh')
+            console.log(response.data.nextval);
             setIDProceso(response.data.nextval);
         } catch (error) {
             console.error('Error al obtener procesos:', error);
@@ -246,13 +239,23 @@ const Add_Form = (props) => {
 
     const obtenerFechaDocumentosHabilitantes = (selectedDate) => {
         const fechaSeleccionada = new Date(selectedDate);
+        const anioOriginal = fechaSeleccionada.getFullYear();
+        const mesOriginal = fechaSeleccionada.getMonth();
         fechaSeleccionada.setDate(fechaSeleccionada.getDate() - 30);
-        console.log(fechaSeleccionada);
+        const anioModificado = fechaSeleccionada.getFullYear();
+
+        // Verificar si la fecha resultante está en el mismo año
+        if (anioModificado !== anioOriginal && mesOriginal===0) {
+            // Establecer la fecha al 1 de enero del mismo año
+            fechaSeleccionada.setFullYear(anioOriginal);
+            fechaSeleccionada.setMonth(mesOriginal); // 0 representa enero
+            fechaSeleccionada.setDate(0);
+        }
+
         // Formatear la fecha restada como YYYY-MM-DD
         const fechaRestada = fechaSeleccionada.toISOString().split('T')[0];
-        console.log(fechaRestada);
         return fechaRestada;
-      };
+    };
 
     const handleChangeFechaPublicacion = (event) => {
         setFechaPublicacion(event.target.value);
@@ -299,8 +302,10 @@ const Add_Form = (props) => {
     useEffect(() => {
         const obtenerPPEncontrado = async () => {
             try {
-                const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${filtroPP}`);
-                setPPEncontrado(response.data[0]);
+                if(filtroPP){
+                    const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${filtroPP.value}/${(filtroPP.label.split(': '))[1]}`);
+                    setPPEncontrado(response.data[0]);
+                }
             } catch (error) {
                 console.error('Error al obtener partida presupuestaria seleccionada:', error);
                 setError(error);
@@ -309,17 +314,18 @@ const Add_Form = (props) => {
 
         obtenerPPEncontrado();
 
-    }, [seleccionadoPartidasP]);
+    }, [filtroPP]);
     
     
 
     const handleInputChangePartida = (selectedOption) => {
         if (selectedOption) {
-            setFiltroPP(selectedOption.value);
+            setFiltroPP(selectedOption);
             setSeleccionadoPartidasP(selectedOption);
           } else {
             setSeleccionadoPartidasP(''); // Maneja el caso en el que se limpie la selección
             setFiltroPP('');
+            setPPEncontrado('');
         }
     };
 
@@ -375,12 +381,38 @@ const Add_Form = (props) => {
     const handleInputChangeCPC = (opcion) => {
         if (opcion) {
             setFiltroCPC(opcion);
-            setSeleccionadoCPC({ index: `${opcion.value}`, opcion: `${opcion.label}` });
+            setSeleccionadoCPC({ index: `${opcion.value}`, opcion: `${(opcion.label.split(': '))[1]}` });
           } else {
-            setSeleccionadoCPC(''); 
+            setSeleccionadoCPC([]); 
             setFiltroCPC('');
         }
+    };
+
+    const handleInputChangeCantidad = (e) => {
+        const value = e.target.value;
+
+        if (/^\d*$/.test(value)) {
+                setCantidad(value);
+                setError(''); // Limpiar el mensaje de error si la entrada es válida
+        } 
+    };
+
+    const handleInputChangeCostoUnitario = (e) => {
+        const value = e.target.value; // El valor del input
+        setCostoUnitario(value);
       };
+
+    const handleInputBlurCostoUnitario = (e) => {
+        // Reemplazar la coma por un punto
+    const valueWithDot = costoUnitario.replace(',', '.');
+
+    // Convertir a número con 4 decimales
+    const parsedValue = parseFloat(valueWithDot);
+    const roundedValue = !isNaN(parsedValue) ? parsedValue.toFixed(2) : '';
+
+    setCostoUnitario(roundedValue);
+        
+    }
 
     const regresar_Inicio = () => {
         window.history.back();
@@ -442,7 +474,7 @@ const Add_Form = (props) => {
             errores.mensaje_cantidad = ('*Ingrese cantidad de producto');
             formValido = false;
         }
-        if (!costoUnitario.trim()) {
+        if (!costoUnitario.toString().trim()) {
             errores.mensaje_costo = ('*Ingrese costo unitario de producto');
             formValido = false;
         }
@@ -458,8 +490,8 @@ const Add_Form = (props) => {
             setMensajeError([]);
             try {
               const response = await Axios.post('http://190.154.254.187:5000/registrarProceso/', {
-                proceso: id_proceso,
-                partida: ppEncontrado.id_partida, 
+                proceso: parseInt(id_proceso,10),
+                partida: parseInt(ppEncontrado.id_partida,10), 
                 anio: anioActual, 
                 cpc: filtroCPC.value, 
                 tipoCompra: seleccionadoCompra.value, 
@@ -482,14 +514,14 @@ const Add_Form = (props) => {
                 codigoProyectoBid: null, 
                 tipoRegimen: seleccionadoRegimen.value, 
                 tipoPresupuesto: ppEncontrado.tipo_presupuesto, 
-                funcionarioResponsable: 'Esto es una prueba', 
-                directorResponsable: 'Esto es una prueba', 
+                funcionarioResponsable: user, 
+                directorResponsable: directorResponsable, 
                 versionProceso: 1, 
                 unidad: seleccionadoUnidad.label, 
                 presupuestoPublicado: null, 
                 observaciones: null, 
-                revisorCompras: 'Esto es una prueba', 
-                funcionarioRevisor: 'Esto es una prueba', 
+                revisorCompras: null, 
+                funcionarioRevisor: funcionario_revisor, 
                 fechaUltModif:null, 
                 usrCreacion: user, 
                 usrUltModif: null, 
@@ -705,7 +737,7 @@ const Add_Form = (props) => {
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Cantidad</label></td>
                                     <td style={{ width: '70%' }}>
                                         <label>
-                                            <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)}/>
+                                            <input type="number" value={cantidad} onChange={handleInputChangeCantidad} />
                                         </label>
                                     </td>
                                 </tr>
@@ -729,7 +761,7 @@ const Add_Form = (props) => {
                                     <td style={{ width: '20%' }}><label style={etiqueta}>Costo Unitario</label></td>
                                     <td style={{ width: '70%' }}>
                                         <label>
-                                            <input type="number" value={costoUnitario} onChange={(e) => setCostoUnitario(e.target.value)}/>
+                                            <input type="number" value={costoUnitario} onChange={handleInputChangeCostoUnitario} onBlur={handleInputBlurCostoUnitario} step={'1'}/>
                                         </label>
                                     </td>
                                 </tr>

@@ -95,10 +95,15 @@ class Inicio extends Component {
                                         <th></th>
                                         <th></th>
                                         <th></th>
+                                        <th></th>
                                         <th>Codigo Proceso</th>
                                         <th>Objeto Contratación</th>
                                         <th>Tipo Compra</th>
                                         <th>Tipo Regimen</th>
+                                        <th>Partida Presupuestaria</th>
+                                        <th>Dirección</th>
+                                        <th>Departamento</th>
+                                        <th>Año</th>
                                         <th>
                                             <button onClick={() => this.agregar_proceso(username)} style={BotonCircular}>Crear Proceso</button>
                                         </th>
@@ -115,6 +120,10 @@ class Inicio extends Component {
                                             <td>{proceso.detalle_producto}</td>
                                             <td>{proceso.tipo_compra}</td>
                                             <td>{proceso.tipo_regimen}</td>
+                                            <td>{proceso.partida_presupuestaria}</td>
+                                            <td>{proceso.direccion}</td>
+                                            <td>{proceso.id_departamento}</td>
+                                            <td>{proceso.año}</td>
                                         </tr>
                                     ))}
                                 </tbody>

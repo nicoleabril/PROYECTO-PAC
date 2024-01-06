@@ -82,6 +82,17 @@ app.get('/obtener_info_user/:correo', async(req, res) => {
     }
 })
 
+app.get('/obtener_info_user_dado_ID/:id', async(req, res) => {
+    try{
+        const { id } = req.params;
+        const info_user = await pool.query('SELECT * FROM pac.pac_usuarios WHERE id_usuario = $1', [id]);
+        return res.json(info_user.rows);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor' });
+    }
+})
+
 
 app.get('/obtener_regimen/', async(req, res) => {
     try{
@@ -225,10 +236,10 @@ app.get('/obtenerPartidasPresupuestarias/:id_direccion', async (req, res) => {
     }
 });
 
-app.get('/obtenerPartidaPresupuestaria/:codigo_partida', async (req, res) => {
+app.get('/obtenerPartidaPresupuestaria/:codigo_partida/:actividad', async (req, res) => {
     try {
-        const { codigo_partida } = req.params;
-        const partidas = await pool.query('SELECT id_partida, codigo_partida, nombre_partida, descripcion_partida, valor_disponible, fecha_actualizacion, id_direccion, actividad, tipo_presupuesto FROM pac.pac_partidas_presupuestarias WHERE codigo_partida = $1', [codigo_partida]);
+        const { codigo_partida, actividad } = req.params;
+        const partidas = await pool.query('SELECT * FROM pac.pac_partidas_presupuestarias WHERE codigo_partida = $1 and actividad = $2', [codigo_partida, actividad]);
         return res.json(partidas.rows);
     } catch (error) {
         console.error(error)
