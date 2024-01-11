@@ -185,14 +185,14 @@ app.get('/obtener_proceso/:id_proceso', async (req, res) => {
     try {
         const { id_proceso } = req.params;
         // Comprobar si el usuario tiene procesos
-        const nro_procesos = await pool.query('SELECT * FROM pac.pac_procesos WHERE id_proceso = $1', [id_proceso]);
+        const nro_procesos = await pool.query('SELECT * FROM pac.pac_procesos WHERE pac_fase_preparatoria_pk = $1', [id_proceso]);
 
         if (nro_procesos.rows.length === 0) {
             return res.status(404).json({ message: 'No se encontro el proceso' });
         }
         try {
             // Obtener los procesos del usuario
-            const procesos = await pool.query('SELECT * FROM pac.pac_procesos WHERE id_proceso = $1', [id_proceso]);
+            const procesos = await pool.query('SELECT * FROM pac.pac_procesos WHERE pac_fase_preparatoria_pk = $1', [id_proceso]);
             return res.json(procesos.rows);
         } catch (error) {
             console.error(error);
@@ -219,6 +219,17 @@ app.post('/registrarProceso/', async (req, res) => {
         const { proceso, partida, anio, cpc, tipoCompra, codigoProceso, detalleProducto, cantidadAnual, estado, costoUnitario, total, cuatrimestre, fechaEedh, fechaReedh, fechaEstPublic, fechaRealPublic, tipoProducto, catalogoElectronico, procedimeintoSugerido, fondosBid, codOpePresBid, codigoProyectoBid, tipoRegimen, tipoPresupuesto, funcionarioResponsable, directorResponsable, versionProceso, unidad, presupuestoPublicado, observaciones, revisorCompras, funcionarioRevisor, fechaUltModif, usrCreacion, usrUltModif, fechaCreacion, direccion, partidaPresupuestaria, pacFasePreparatoriaPK, secuencialResolucion, eliminado, estadoFasePreparatoria, fechaEdp, fechaCpc, fechaRv, fechaSip, fechaExp, fechaElp, fechaSi, fechaRi, fechaFin, revisorJuridico, idDepartamento, reqIp } = req.body;
         await pool.query('INSERT INTO pac.pac_procesos(id_proceso, id_partida, "año", cpc, tipo_compra, codigo_proceso, detalle_producto, cantidad_anual, estado, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_reedh, fecha_est_public, fecha_real_public, tipo_producto, catalogo_electronico, procedimiento_sugerido, fondos_bid, cod_ope_pres_bid, codigo_proyecto_bid, tipo_regimen, tipo_presupuesto, funcionario_responsable, director_responsable, version_proceso, unidad, presupuesto_publicado, observaciones, revisor_compras, funcionario_revisor, fecha_ult_modif, usr_creacion, usr_ult_modif, fecha_creacion, direccion, partida_presupuestaria, pac_fase_preparatoria_pk, secuencial_resolucion, eliminado, estado_fase_preparatoria, fecha_edp, fecha_cpc, fecha_rv, fecha_sip, fecha_exp, fecha_elp, fecha_si, fecha_ri, fecha_fin, revisor_juridico, id_departamento, req_ip) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54)', [proceso, partida, anio, cpc, tipoCompra, codigoProceso, detalleProducto, cantidadAnual, estado, costoUnitario, total, cuatrimestre, fechaEedh, fechaReedh, fechaEstPublic, fechaRealPublic, tipoProducto, catalogoElectronico, procedimeintoSugerido, fondosBid, codOpePresBid, codigoProyectoBid, tipoRegimen, tipoPresupuesto, funcionarioResponsable, directorResponsable, versionProceso, unidad, presupuestoPublicado, observaciones, revisorCompras, funcionarioRevisor, fechaUltModif, usrCreacion, usrUltModif, fechaCreacion, direccion, partidaPresupuestaria, pacFasePreparatoriaPK, secuencialResolucion, eliminado, estadoFasePreparatoria, fechaEdp, fechaCpc, fechaRv, fechaSip, fechaExp, fechaElp, fechaSi, fechaRi, fechaFin, revisorJuridico, idDepartamento, reqIp]);
         return res.status(201).json({ message: 'Proceso registrado con éxito' });
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.post('/registrarReforma/', async (req, res) => {
+    try {
+        const { area_requirente, anio, just_tecnica, just_econom, just_caso_fort_fmayor, id_partida_presupuestaria, partida_presupuestaria, cpc, tipo_compra, tipo_regimen, tipo_presupuesto, tipo_producto, procedimiento_sugerido, descripcion, cantidad, unidad, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_est_public, observaciones, usr_creacion, fecha_creacion, id_proceso, estado_elaborador, usr_revisor, usr_aprobador, usr_consolidador, usr_autorizador, id_departamento, version_proceso, comentario, secuencial_resolucion } = req.body;
+        await pool.query('INSERT INTO pac.pac_reformas_pac(area_requirente, anio, just_tecnica, just_econom, just_caso_fort_fmayor, id_partida_presupuestaria, partida_presupuestaria, cpc, tipo_compra, tipo_regimen, tipo_presupuesto, tipo_producto, procedimiento_sugerido, descripcion, cantidad, unidad, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_est_public, observaciones, usr_creacion, fecha_creacion, id_proceso, estado_elaborador, usr_revisor, usr_aprobador, usr_consolidador, usr_autorizador, id_departamento, version_proceso, comentario, secuencial_resolucion) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)', [area_requirente, anio, just_tecnica, just_econom, just_caso_fort_fmayor, id_partida_presupuestaria, partida_presupuestaria, cpc, tipo_compra, tipo_regimen, tipo_presupuesto, tipo_producto, procedimiento_sugerido, descripcion, cantidad, unidad, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_est_public, observaciones, usr_creacion, fecha_creacion, id_proceso, estado_elaborador, usr_revisor, usr_aprobador, usr_consolidador, usr_autorizador, id_departamento, version_proceso, comentario, secuencial_resolucion]);
+        return res.status(201).json({ message: 'Reforma registrada con éxito' });
     } catch (error) {
         console.error(error.stack);
         return res.status(500).json({ message: 'Error en el servidor:' + error });

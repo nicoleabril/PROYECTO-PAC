@@ -10,7 +10,7 @@ import { Navigate } from 'react-router-dom';
 const body = {
     position:'absolute',
     top: '20%',
-    left:'20%',
+    left:'8%',
     width:'60%',
 
 };
@@ -112,9 +112,9 @@ class Inicio extends Component {
                                 <tbody>
                                     {this.state.procesos.map(proceso => (
                                         <tr key={proceso.id_proceso}>
-                                            <td onClick={() => this.detalle_reforma(proceso.id_proceso)} style={enlace}>Ver</td>
-                                            <td onClick={() => this.editar_reforma(proceso.id_proceso)} style={enlace}>Editar</td>
-                                            <td onClick={() => this.eliminar_reforma(proceso.id_proceso)} style={enlace}>Eliminar</td>
+                                            <td onClick={() => this.detalle_reforma(proceso.pac_fase_preparatoria_pk)} style={enlace}><i class="fa fa-eye" aria-hidden="true"></i></td>
+                                            <td onClick={() => this.editar_reforma(proceso.pac_fase_preparatoria_pk)} style={enlace}><i class="fa fa-pencil" aria-hidden="true"></i></td>
+                                            <td onClick={() => this.eliminar_reforma(proceso.pac_fase_preparatoria_pk)} style={enlace}><i class="fa fa-trash" aria-hidden="true"></i></td>
                                             <td>{proceso.id_proceso}</td>
                                             <td>{proceso.codigo_proceso}</td>
                                             <td>{proceso.detalle_producto}</td>

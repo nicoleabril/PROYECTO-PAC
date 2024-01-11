@@ -11,7 +11,7 @@ import Autorizacion_reformas from './pages/Autorizacion_Reformas';
 import Detalle_reforma from './pages/Pantalla_Detalle_Reforma';
 import Editar_Reforma from './pages/Edicion_Reformas';
 import Inclusion_Reforma from './pages/Inclusion_Reformas';
-import Eliminar_Reforma from './pages/Eliminar_Reformas';
+import Eliminar_Reforma from './pages/Pantalla_Eliminar_Reformas';
 import PAC from './pages/PAC';
 import CPC from './pages/CPC';
 import 'font-awesome/css/font-awesome.min.css';
