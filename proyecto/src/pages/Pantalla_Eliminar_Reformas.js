@@ -75,24 +75,17 @@ const Eliminacion_Reformas = () => {
     return (
         <>
         <Modal isOpen={state.abierto} style={modalStyles}>
-            <ModalHeader>
-            Iniciar Sesión
-            </ModalHeader>
-            <ModalBody>
-            <FormGroup>
-                <Label for="usuario">Usuario</Label>
-                <Input type="text" id="usuario"/> 
-            </FormGroup>
-            <FormGroup>
-                <Label for="password">Contraseña</Label>
-                <Input type="text" id="password"/> 
-            </FormGroup>
-            </ModalBody>
-            <ModalFooter>
-                <Button color="primary">Iniciar Sesión</Button>
-                <Button color="secondary" onClick={abrirModal}>Cerrar</Button>
-            </ModalFooter>
-        </Modal>
+                        <ModalHeader>
+                        Confirmación de Eliminación
+                        </ModalHeader>
+                        <ModalBody>
+                        <p>¿Está seguro de que desea eliminar este proceso?</p>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button color="danger" >Sí, estoy seguro</Button>
+                            <Button color="secondary" onClick={abrirModal}>Cancelar</Button>
+                        </ModalFooter>
+                    </Modal>
         </>
     );
 };

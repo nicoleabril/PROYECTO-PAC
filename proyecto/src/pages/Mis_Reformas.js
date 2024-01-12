@@ -20,6 +20,13 @@ const enlace={
     color: 'blue',
 }
 
+const modalStyles={
+    position: "absolute",
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
+}
+
 
 
 class Mis_reformas extends Component {
@@ -30,6 +37,14 @@ class Mis_reformas extends Component {
             isLoggedIn: Cookies.get('authToken') ? true : false,
             procesos: []
         };
+    }
+
+    state={
+        abierto: false,
+    }
+    
+    abrirModal=()=>{
+        this.setState({abierto: !this.state.abierto});
     }
 
     componentDidMount() {

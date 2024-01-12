@@ -236,6 +236,17 @@ app.post('/registrarReforma/', async (req, res) => {
     }
 });
 
+app.post('/eliminarReforma/', async (req, res) => {
+    try {
+        const { id_proceso, version_proceso } = req.body;
+        await pool.query('SELECT pac.eliminar_procesos_pac_reformas_proc($1, $2)', [id_proceso, version_proceso]);
+        return res.status(201).json({ message: 'Reforma eliminada con éxito' });
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
 app.get('/obtenerPartidasPresupuestarias/:id_direccion', async (req, res) => {
     try {
         const { id_direccion } = req.params;

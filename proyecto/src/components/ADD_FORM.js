@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 import Axios from 'axios';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { toast, ToastContainer } from "react-toastify";
 
 const body = {
     position: 'absolute',
@@ -527,9 +528,11 @@ const Add_Form = (props) => {
               });
     
               console.log('Respuesta del servidor:', response.data);
+              toast.success(response.data.message);
               
             } catch (error) {
               console.error('Error al enviar datos:', error);
+              toast.error('Error al enviar datos:', error);
               
             }
         }
@@ -780,6 +783,7 @@ const Add_Form = (props) => {
                     </form>
                 </div>
             </div>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </div>
     );
 }
