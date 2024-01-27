@@ -9,12 +9,8 @@ import { useParams } from 'react-router-dom';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import { toast, ToastContainer } from "react-toastify";
-const body = {
-    position: 'absolute',
-    top: '20%',
-    left: '8%',
-    width: '60%'
-};
+import Detalle_reforma from '../pages/Pantalla_Detalle_Reforma';
+
 
 const etiqueta = {
     fontWeight: 'bold',
@@ -27,7 +23,7 @@ const grupoForm = {
     borderWidth: '0px 2px 2px 2px',
     borderRadius: '0px 0px 5px 5px',
     padding: '10px',
-    width: '140%',
+    width: '100%',
 }
 
 const mensaje_Error = {
@@ -42,7 +38,7 @@ const encabezaGrupoForm = {
     backgroundColor: '#176B87',
     fontWeight: 'bold',
     color: 'white',
-    width: '140%',
+    width: '100%',
     padding: '10px',
 }
 
@@ -50,7 +46,7 @@ const encabezaGrupoForm = {
 const Edit_Form = (props) => {
     const token = Cookies.get('authToken');
     const isLoggedIn = token ? true : false;
-    const { id } = useParams();
+    const { id, tabla, posicionAbsoluta } = useParams();
     const [proceso, setProceso] = useState([]);
     const user = Cookies.get('usr');
     const [regimen, setTipoRegimen] = useState([]);
@@ -94,15 +90,37 @@ const Edit_Form = (props) => {
         mensaje_costo:'', mensaje_fecha_estimada:'',
     });
 
+    let posicion = '';
+    if(posicionAbsoluta === 'true'){
+      posicion = 'absolute';
+    }else{
+      posicion = 'relative';
+    }
+    
+    const body = {
+        position: `${posicion}`,
+    };
+
     useEffect(() => {
         const obtenerProceso = async () => {
-          try {
-            const response = await Axios.get(`http://190.154.254.187:5000/obtener_proceso/${id}`);
-            setProceso(response.data);
-          } catch (error) {
-            console.error('Error al obtener procesos:', error);
-            setError(error);
-          }
+            if(tabla==='procesos'){
+                try {
+                  const response = await Axios.get(`http://190.154.254.187:5000/obtener_proceso/${id}`);
+                  setProceso(response.data);
+                } catch (error) {
+                  console.error('Error al obtener procesos:', error);
+                  setError(error);
+                }
+              } 
+              if(tabla==='reformas'){
+                try {
+                  const response = await Axios.get(`http://190.154.254.187:5000/obtener_reforma/${id}`);
+                  setProceso(response.data);
+                } catch (error) {
+                  console.error('Error al obtener procesos:', error);
+                  setError(error);
+                }
+              }
         };
     
         if (!isLoggedIn) {
@@ -349,49 +367,77 @@ const Edit_Form = (props) => {
         if(formValido){
             setMensajeError([]);
             try {
-              const response = await Axios.post('http://190.154.254.187:5000/registrarReforma/', {
-                area_requirente: area, 
-                anio: anioActual, 
-                just_tecnica: justificacionTec, 
-                just_econom: justificacionEco, 
-                just_caso_fort_fmayor: justificacionFortuita, 
-                id_partida_presupuestaria: parseInt(ppEncontrado.id_partida,10), 
-                partida_presupuestaria: ppEncontrado.codigo_partida, 
-                cpc: filtroCPC.value, 
-                tipo_compra: seleccionadoCompra.value, 
-                tipo_regimen: seleccionadoRegimen.value, 
-                tipo_presupuesto: ppEncontrado.tipo_presupuesto, 
-                tipo_producto: tipoProducto, 
-                procedimiento_sugerido: seleccionadoProcSuge.value, 
-                descripcion: null, 
-                cantidad: cantidad, 
-                unidad: seleccionadoUnidad.label, 
-                costo_unitario: costoUnitario, 
-                total: total, 
-                cuatrimestre: cuatrimestre, 
-                fecha_eedh: fechaDocumentos, 
-                fecha_est_public: fechaPublicacion, 
-                observaciones: null, 
-                usr_creacion: user, 
-                fecha_creacion: fechaActual, 
-                id_proceso: parseInt(proceso[0].id_proceso,10), 
-                estado_elaborador: null, 
-                usr_revisor: funcionario_revisor, 
-                usr_aprobador: directorResponsable, 
-                usr_consolidador: null, 
-                usr_autorizador: null, 
-                id_departamento: idDepartamento, 
-                version_proceso: proceso[0].version_proceso+1, 
-                comentario: null, 
-                secuencial_resolucion: null
-              });
-    
-              console.log('Respuesta del servidor:', response.data);
-              toast.success(response.data.message);
-              
+                if(tabla === 'procesos'){
+                    const response = await Axios.post('http://190.154.254.187:5000/registrarReforma/', {
+                        area_requirente: area, 
+                        anio: anioActual, 
+                        just_tecnica: justificacionTec, 
+                        just_econom: justificacionEco, 
+                        just_caso_fort_fmayor: justificacionFortuita, 
+                        id_partida_presupuestaria: parseInt(ppEncontrado.id_partida,10), 
+                        partida_presupuestaria: ppEncontrado.codigo_partida, 
+                        cpc: filtroCPC.value, 
+                        tipo_compra: seleccionadoCompra.value, 
+                        tipo_regimen: seleccionadoRegimen.value, 
+                        tipo_presupuesto: ppEncontrado.tipo_presupuesto, 
+                        tipo_producto: tipoProducto, 
+                        procedimiento_sugerido: seleccionadoProcSuge.value, 
+                        descripcion: null, 
+                        cantidad: cantidad, 
+                        unidad: seleccionadoUnidad.label, 
+                        costo_unitario: costoUnitario, 
+                        total: total, 
+                        cuatrimestre: cuatrimestre, 
+                        fecha_eedh: fechaDocumentos, 
+                        fecha_est_public: fechaPublicacion, 
+                        observaciones: null, 
+                        usr_creacion: user, 
+                        fecha_creacion: fechaActual, 
+                        id_proceso: parseInt(proceso[0].id_proceso,10), 
+                        estado_elaborador: null, 
+                        usr_revisor: funcionario_revisor, 
+                        usr_aprobador: directorResponsable, 
+                        usr_consolidador: null, 
+                        usr_autorizador: null, 
+                        id_departamento: idDepartamento, 
+                        version_proceso: proceso[0].version_proceso+1, 
+                        comentario: null, 
+                        secuencial_resolucion: null
+                    });
+                    console.log('Respuesta del servidor:', response.data);
+                    toast.success(response.data.message);
+                }
+                if(tabla === 'reformas'){
+                    const response = await Axios.post('http://190.154.254.187:5000/editarReforma/', {
+                        just_tecnica: justificacionTec, 
+                        just_econom: justificacionEco, 
+                        just_caso_fort_fmayor: justificacionFortuita, 
+                        id_partida_presupuestaria: parseInt(ppEncontrado.id_partida,10), 
+                        partida_presupuestaria: ppEncontrado.codigo_partida, 
+                        cpc: filtroCPC.value, 
+                        tipo_compra: seleccionadoCompra.value, 
+                        tipo_regimen: seleccionadoRegimen.value, 
+                        tipo_presupuesto: ppEncontrado.tipo_presupuesto, 
+                        tipo_producto: tipoProducto, 
+                        procedimiento_sugerido: seleccionadoProcSuge.value, 
+                        descripcion: null, 
+                        cantidad: cantidad, 
+                        unidad: seleccionadoUnidad.label, 
+                        costo_unitario: costoUnitario, 
+                        total: total, 
+                        cuatrimestre: cuatrimestre, 
+                        fecha_eedh: fechaDocumentos, 
+                        fecha_est_public: fechaPublicacion, 
+                        observaciones: null, 
+                        comentario: null, 
+                        secuencial_reforma: id
+                    });
+                    console.log('Respuesta del servidor:', response.data);
+                    toast.success(response.data.message);
+                }
             } catch (error) {
               console.error('Error al enviar datos:', error);
-              toast.error('Error al enviar datos:', error);
+              toast.error('Error al enviar datos', error.message);
             }
         }
     };
@@ -528,111 +574,10 @@ const Edit_Form = (props) => {
     return (
         <div style={body}>
             <div>
-            <div>
-                <h1>Editar Reforma</h1>
-                {error && <p>Error al obtener procesos: {error.message}</p>}
-                <div style={encabezaGrupoForm}>
-                    <table width="100%">
-                                <tr>
-                                    <td style={{ width: '80%' }}><label style={etiqueta}>Estado Actual</label></td>
-                                    <td onClick={() => regresar_Inicio()} style={{ width: '10%' }}>Regresar</td>
-                                </tr>
-                            </table>
-            </div>   
-            {proceso.length > 0 ? (
-                <div style={grupoForm}>  
-                  {proceso.map((procesoItem) => (
-                    <table width="100%"  key={procesoItem.id_proceso}>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Año</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.año}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Cantidad</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.cantidad_anual}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Dirección</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.direccion}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Unidad</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.unidad}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto', textAlign: 'right'}}><label style={etiqueta}>Partida Presupuestaria</label></td>
-                          <td style={{width:'auto', textAlign: 'left'}}><label>{procesoItem.partida_presupuestaria}</label></td>
-                          <td style={{width:'auto'}}></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Código Proceso</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.codigo_proceso}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Costo Unitario</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.costo_unitario}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>CPC</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.cpc}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Total</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.total}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Tipo Compra</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.tipo_compra}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Cuatrimestre</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.cuatrimestre}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Tipo Régimen</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.tipo_regimen}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Fecha Entrega Documentos Habilitantes</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.fecha_eedh}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Tipo Presupuesto</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.tipo_presupuesto}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Fecha Estimada Publicación</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.fecha_est_public}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Tipo Producto</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.tipo_producto}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Responsable</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.funcionario_responsable}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Procedimiento Sugerido</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.procedimiento_sugerido}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Revisor Compras</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.revisor_compras}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Objeto de Contratación</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.detalle_producto}</label></td>
-                          <td style={{width:'auto'}}></td>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Revisor Jurídico</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.revisor_juridico}</label></td>
-                      </tr>
-                      <tr>
-                          <td style={{width:'auto',textAlign: 'right'}}><label style={etiqueta}>Estado Fase Preparatoria</label></td>
-                          <td style={{width:'auto',textAlign: 'left'}}><label>{procesoItem.estado_fase_preparatoria}</label></td>
-                          <td style={{width:'auto'}}></td>
-                      </tr>
-                    </table>
-                  ))}
+                <div>
+                    <h1>Editar Reforma</h1>
+                    {error && <p>Error al obtener procesos: {error.message}</p>}
                 </div>
-                /*</tbody>
-              </table>*/
-              
-            ) : (
-              <p>No hay procesos disponibles.</p>
-            )}
-            </div> <br />
             <div>
                     <form onSubmit={handleSubmit}>
                         <div style={encabezaGrupoForm}>
@@ -873,6 +818,7 @@ const Edit_Form = (props) => {
                     </form>
                 </div>
             </div>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </div>
     );
 }

@@ -504,7 +504,7 @@ const Add_Form = (props) => {
                 tipo_presupuesto: ppEncontrado.tipo_presupuesto, 
                 tipo_producto: tipoProducto, 
                 procedimiento_sugerido: seleccionadoProcSuge.value, 
-                descripcion: null, 
+                descripcion: objetoContratacion, 
                 cantidad: cantidad, 
                 unidad: seleccionadoUnidad.label, 
                 costo_unitario: costoUnitario, 
@@ -532,7 +532,7 @@ const Add_Form = (props) => {
               
             } catch (error) {
               console.error('Error al enviar datos:', error);
-              toast.error('Error al enviar datos:', error);
+              toast.error('Error al enviar datos', error.message);
               
             }
         }

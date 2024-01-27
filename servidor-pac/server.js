@@ -204,6 +204,29 @@ app.get('/obtener_proceso/:id_proceso', async (req, res) => {
     }
 });
 
+app.get('/obtener_reforma/:secuencial_reforma', async (req, res) => {
+    try {
+        const { secuencial_reforma } = req.params;
+        // Comprobar si el usuario tiene procesos
+        const nro_procesos = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE secuencial_reforma = $1', [secuencial_reforma]);
+
+        if (nro_procesos.rows.length === 0) {
+            return res.status(404).json({ message: 'No se encontro el proceso' });
+        }
+        try {
+            // Obtener los procesos del usuario
+            const procesos = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE secuencial_reforma = $1', [secuencial_reforma]);
+            return res.json(procesos.rows);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Error en el servidor' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
 app.get('/obtener_id_proceso/', async (req, res) => {
     try{
         const id_proceso = await pool.query('SELECT nextval(\'pac.pac_procesos_id_proceso_seq\')');
@@ -238,9 +261,67 @@ app.post('/registrarReforma/', async (req, res) => {
 
 app.post('/eliminarReforma/', async (req, res) => {
     try {
-        const { id_proceso, version_proceso } = req.body;
-        await pool.query('SELECT pac.eliminar_procesos_pac_reformas_proc($1, $2)', [id_proceso, version_proceso]);
+        const { id_proceso, version_proceso, just_tec, just_econom, just_caso_fort } = req.body;
+        await pool.query('SELECT pac.eliminar_procesos_pac_reformas_proc($1, $2, $3, $4, $5)', [id_proceso, version_proceso, just_tec, just_econom, just_caso_fort]);
         return res.status(201).json({ message: 'Reforma eliminada con éxito' });
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.delete('/eliminarFisicaReforma/', async (req, res) => {
+    try {
+        const { secuencial_reforma } = req.body;
+        await pool.query('DELETE FROM pac.pac_reformas_pac WHERE secuencial_reforma = $1', [secuencial_reforma]);
+        return res.status(201).json({ message: 'Reforma eliminada con éxito' });
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.post('/editarReforma/', async (req, res) => {
+    try {
+        const {just_tecnica, just_econom, just_caso_fort_fmayor, id_partida_presupuestaria,partida_presupuestaria, cpc, tipo_compra, tipo_regimen, tipo_presupuesto, tipo_producto, procedimiento_sugerido,  descripcion, cantidad, unidad, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_est_public, observaciones, comentario, secuencial_reforma} = req.body;
+        await pool.query('UPDATE pac.pac_reformas_pac SET just_tecnica = $1, just_econom = $2, just_caso_fort_fmayor = $3, id_partida_presupuestaria = $4, partida_presupuestaria = $5, cpc = $6, tipo_compra = $7, tipo_regimen = $8, tipo_presupuesto = $9, tipo_producto = $10, procedimiento_sugerido = $11, descripcion= $12, cantidad = $13, unidad = $14, costo_unitario= $15, total= $16, cuatrimestre = $17, fecha_eedh = $18, fecha_est_public = $19, observaciones = $20, comentario = $21 WHERE secuencial_reforma = $22', [just_tecnica, just_econom, just_caso_fort_fmayor, id_partida_presupuestaria,partida_presupuestaria, cpc, tipo_compra, tipo_regimen, tipo_presupuesto, tipo_producto, procedimiento_sugerido,  descripcion, cantidad, unidad, costo_unitario, total, cuatrimestre, fecha_eedh, fecha_est_public, observaciones, comentario, secuencial_reforma]);
+        return res.status(201).json({ message: 'Reforma Editada con éxito' });
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.post('/cambiarEstadoReforma/', async (req, res) => {
+    try {
+        const {estadoACambiar, estadoNuevo, secuencial_reforma} = req.body;
+        if(estadoACambiar === 'estado_revisor'){
+            await pool.query('UPDATE pac.pac_reformas_pac SET estado_revisor = $1 WHERE secuencial_reforma=$2', [estadoNuevo,secuencial_reforma]);
+            return res.status(201).json({ message: 'Estado de Reforma Cambiado con Éxito' });
+        }
+        if(estadoACambiar === 'estado_aprobador'){
+            await pool.query('UPDATE pac.pac_reformas_pac SET estado_aprobador = $1 WHERE secuencial_reforma=$2', [estadoNuevo,secuencial_reforma]);
+            return res.status(201).json({ message: 'Estado de Reforma Cambiado con Éxito' });
+        }
+        if(estadoACambiar === 'estado_consolidador'){
+            await pool.query('UPDATE pac.pac_reformas_pac SET estado_consolidador = $1 WHERE secuencial_reforma=$2', [estadoNuevo,secuencial_reforma]);
+            return res.status(201).json({ message: 'Estado de Reforma Cambiado con Éxito' });
+        }
+        if(estadoACambiar === 'estado_autorizador'){
+            await pool.query('UPDATE pac.pac_reformas_pac SET estado_autorizador = $1 WHERE secuencial_reforma=$2', [estadoNuevo,secuencial_reforma]);
+            return res.status(201).json({ message: 'Estado de Reforma Cambiado con Éxito' });
+        }
+    } catch (error) {
+        console.error(error.stack);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+app.post('/enviarComentario/', async (req, res) => {
+    try {
+        const {comentario, secuencial_reforma} = req.body;
+        await pool.query('UPDATE pac.pac_reformas_pac SET comentario = $1 WHERE secuencial_reforma=$2', [comentario,secuencial_reforma]);
+        return res.status(201).json({ message: 'Comentario enviado con Éxito' });
     } catch (error) {
         console.error(error.stack);
         return res.status(500).json({ message: 'Error en el servidor:' + error });
@@ -289,6 +370,43 @@ app.get('/obtener_cpc/', async (req, res) => {
         try {
             const cpc = await pool.query('SELECT cp_codigo as index, cp_descripcion as opcion FROM pac.pac_cpc');
             return res.json(cpc.rows);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Error en el servidor' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error en el servidor:' + error });
+    }
+});
+
+
+app.get('/obtenerReformas/:estado/:valor', async (req, res) => {
+    try {
+        const { estado, valor } = req.params;
+        console.log(estado);
+        console.log(valor);
+        const nro_reformas = await pool.query('SELECT count(*) FROM pac.pac_reformas_pac');
+        if (nro_reformas.rows.length === 0) {
+            return res.status(404).json({ message: 'No existen datos' });
+        }
+        try {
+            if(estado === 'estado_revisor'){
+                const reformas = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE estado_revisor = $1 ORDER BY id_proceso', [valor]);
+                return res.json(reformas.rows);
+            }
+            if(estado === 'estado_aprobador'){
+                const reformas = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE estado_aprobador = $1 ORDER BY id_proceso', [valor]);
+                return res.json(reformas.rows);
+            }
+            if(estado === 'estado_consolidador'){
+                const reformas = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE estado_consolidador = $1 ORDER BY id_proceso', [valor]);
+                return res.json(reformas.rows);
+            }
+            if(estado === 'estado_autorizador'){
+                const reformas = await pool.query('SELECT * FROM pac.pac_reformas_pac WHERE estado_autorizador = $1 ORDER BY id_proceso', [valor]);
+                return res.json(reformas.rows);
+            }    
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Error en el servidor' });
