@@ -390,6 +390,7 @@ const Edit_Form = (props) => {
                         cuatrimestre: cuatrimestre, 
                         fecha_eedh: fechaDocumentos, 
                         fecha_est_public: fechaPublicacion, 
+                        tipo_reforma: 'Modificacion', 
                         observaciones: null, 
                         usr_creacion: user, 
                         fecha_creacion: fechaActual, 

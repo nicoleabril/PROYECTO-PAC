@@ -45,6 +45,8 @@ const Sidebar = () => {
               <li><a className="dropdown-item" href='/aprobacion_reformas'>Aprobación Reformas</a></li>
               <li><a className="dropdown-item" href='/consolidacion_reformas'>Consolidación Reformas</a></li>
               <li><a className="dropdown-item" href='/autorizacion_reformas'>Autorización Reformas</a></li>
+              <li><a className="dropdown-item" href='/resoluciones_reformas'>Resoluciones Reformas</a></li>
+              <li><a className="dropdown-item" href='/seguimiento_reformas'>Seguimiento de Reformas</a></li>
               <li><a className="dropdown-item" href='/actualizacion_pac'>Actualización PAC</a></li>
             </ul>
           </div>

@@ -13,7 +13,7 @@ const usrn={
 const Header=()=>{
   const handleLogOut = () => {
     Cookies.remove('authToken');
-    window.location.href = '/';
+    window.location.href = '/auth/login';
   }  
   return (
       <header className='header'>

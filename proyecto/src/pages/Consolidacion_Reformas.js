@@ -7,7 +7,7 @@ import Footer from '../components/FOOTER';
 import Cookies from 'js-cookie';
 import Axios from 'axios';
 import { Navigate } from 'react-router-dom';
-import TablaFiltrada from '../components/TABLA_FILTRADA';
+import TablaFiltrada from '../components/TABLA_FILTRADA_REFORMA';
 import { toast, ToastContainer } from "react-toastify";
 const body = {
         position:'absolute',

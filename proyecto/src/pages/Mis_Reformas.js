@@ -3,7 +3,7 @@ import Menu from '../components/PAC_MENU';
 import Header from '../components/HEADER';
 import { Button, Form, Container, Row, Col, Table } from 'react-bootstrap';
 import Footer from '../components/FOOTER';
-import TablaFiltrada from '../components/TABLA_FILTRADA';
+import TablaFiltrada from '../components/TABLA_FILTRADA_REFORMA';
 import Cookies from 'js-cookie';
 import Axios from 'axios';
 import { useNavigate, Navigate } from 'react-router-dom';

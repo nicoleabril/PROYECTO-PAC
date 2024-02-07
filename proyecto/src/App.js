@@ -8,9 +8,12 @@ import Revision_reformas from './pages/Revision_Reformas';
 import Aprobacion_reformas from './pages/Aprobacion_Reformas';
 import Consolidacion_reformas from './pages/Consolidacion_Reformas';
 import Autorizacion_reformas from './pages/Autorizacion_Reformas';
+import Resoluciones_reformas from './pages/Resoluciones_Reformas';
+import Seguimiento_reformas from './pages/Seguimiento_Reformas';
 import Detalle_reforma from './pages/Pantalla_Detalle_Reforma';
 import Cambios_Reforma from './pages/Pantalla_Cambios_Reforma';
 import Editar_Reforma from './pages/Edicion_Reformas';
+import Editar_Resolucion from './pages/Edicion_Resolucion';
 import Inclusion_Reforma from './pages/Inclusion_Reformas';
 import Eliminar_Reforma from './pages/Pantalla_Eliminar_Reformas';
 import PAC from './pages/PAC';
@@ -32,10 +35,13 @@ function App() {
           <Route path='/aprobacion_reformas' element={<Aprobacion_reformas />} />
           <Route path='/consolidacion_reformas' element={<Consolidacion_reformas />} />
           <Route path='/autorizacion_reformas' element={<Autorizacion_reformas />} />
+          <Route path='/resoluciones_reformas' element={<Resoluciones_reformas />} />
+          <Route path='/seguimiento_reformas' element={<Seguimiento_reformas />} />
           <Route path='/detalle_reforma/:id/:tabla/:posicionAbsoluta' element={<Detalle_reforma />} />
           <Route path='/editar_reforma/:id/:tabla/:posicionAbsoluta' element={<Editar_Reforma />} />
           <Route path='/eliminar_reforma/:id/:tabla/:posicionAbsoluta' element={<Eliminar_Reforma />} />
           <Route path='/incluir_reforma/:id' element={<Inclusion_Reforma />} />
+          <Route path='/editar_resolucion/:id' element={<Editar_Resolucion />} />
           <Route path='/cambios_reforma/:id/:tabla/:posicionAbsoluta' element={<Cambios_Reforma />} />
           <Route path='/pac' element={<PAC />} />
           <Route path='/cpc' element={<CPC />} />

@@ -304,7 +304,8 @@ const Add_Form = (props) => {
         const obtenerPPEncontrado = async () => {
             try {
                 if(filtroPP){
-                    const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${filtroPP.value}/${(filtroPP.label.split(': '))[1]}`);
+                    console.log(idDireccion);
+                    const response = await Axios.get(`http://190.154.254.187:5000/obtenerPartidaPresupuestaria/${filtroPP.value}/${(filtroPP.label.split(': '))[1]}/${idDireccion}`);
                     setPPEncontrado(response.data[0]);
                 }
             } catch (error) {
@@ -512,6 +513,7 @@ const Add_Form = (props) => {
                 cuatrimestre: cuatrimestre, 
                 fecha_eedh: fechaDocumentos, 
                 fecha_est_public: fechaPublicacion, 
+                tipo_reforma: 'Inclusion', 
                 observaciones: null, 
                 usr_creacion: user, 
                 fecha_creacion: fechaActual, 
