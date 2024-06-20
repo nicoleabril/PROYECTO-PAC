@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Custom styles can be added here if necessary, but with Tailwind, most styling can be done inline */
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Store Dashboard -->
+    <div class="min-h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="flex">
+            <!-- Sidebar component -->
+            <!-- Content -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex justify-between items-center p-6">
+                    <div class="flex items-center space-x-4 lg:space-x-0">
+                        <!-- Logo and branding can go here -->
+                    </div>
+                    <!-- Rest of the header, including search, notifications, and profile -->
+                </header>
+                <!-- Main content -->
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                    <div class="container mx-auto px-6 py-8">
+                        <!-- Breadcrumbs -->
+                        <!-- Page title & actions -->
+                        <div class="flex justify-between items-center">
+                            <!-- Title -->
+                            <h3 class="text-gray-700 text-3xl font-medium">List</h3>
+                            <!-- Actions -->
+                            <div class="flex">
+                                <!-- Action buttons -->
+                            </div>
+                        </div>
+                        <!-- Table -->
+                        <div class="mt-8">
+                            <!-- Table header -->
+                            <div class="flex justify-between items-center py-4 bg-white shadow rounded-lg overflow-hidden">
+                                <!-- Filters and search -->
+                            </div>
+                            <!-- Table content -->
+                            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+                                <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
+                                    <table class="min-w-full leading-normal">
+                                        <thead>
+                                            <!-- Table headers -->
+                                        </thead>
+                                        <tbody>
+                                            <!-- Products list -->
+                                            <tr>
+                                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0">
+                                                            <a href="#" class="block relative">
+                                                                <img alt="Placeholder image for Nike Air Force 1 NDESTRUKT" class="mx-auto" src="https://placehold.co/100x100">
+                                                            </a>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <p class="text-gray-900 whitespace-no-wrap">
+                                                                Nike Air Force 1 NDESTRUKT
+                                                            </p>
+                                                            <p class="text-gray-600 whitespace-no-wrap">
+                                                                Accessories
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <!-- Other cells -->
+                                            </tr>
+                                            <!-- Repeat for each product -->
+                                        </tbody>
+                                    </table>
+                                    <!-- Pagination -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
