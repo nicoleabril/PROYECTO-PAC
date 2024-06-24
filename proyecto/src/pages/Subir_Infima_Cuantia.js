@@ -82,13 +82,30 @@ import zIndex from "@mui/material/styles/zIndex";
             const response = await Axios.get(`http://localhost:5000/obtener_infima_cuantia/${id_infima}`);
             const proceso = response.data[0];
             setProceso(proceso);
-            setUsuarios(Array.from(new Set([proceso.elaborador, proceso.aprobador, proceso.revisor_compras, proceso.oferente_adjudicado])))
             let tipo_compra = 0;
             if(proceso.tipo_compra === 'SERVICIO' || proceso.tipo_compra === 'OBRA'){
               tipo_compra = 7;
+              setUsuarios([
+                { id: 1, nombre: proceso.elaborador, fase_devolucion: "Elaboración de documentos" },
+                { id: 2, nombre: proceso.revisor_compras, fase_devolucion: "Control Previo Compras" },
+                { id: 3, nombre: proceso.elaborador, fase_devolucion: "Solicitud de Publicación de Necesidad de IFC" },
+                { id: 4, nombre: proceso.revisor_compras, fase_devolucion: "Publicación de Necesidad de IFC" },
+                { id: 5, nombre: proceso.revisor_compras, fase_devolucion: "Cuadro Comparativo" },
+                { id: 6, nombre: proceso.elaborador, fase_devolucion: "Elaboración de Orden de Compra" },
+                { id: 7, nombre: proceso.revisor_compras, fase_devolucion: "Ejecución de Orden de Compra" },
+                // Agrega más usuarios y fases según sea necesario
+              ]);
             }
             if(proceso.tipo_compra === 'BIEN'){
               tipo_compra = 6;
+              setUsuarios([
+                { id: 1, nombre: proceso.elaborador, fase_devolucion: "Elaboración de documentos" },
+                { id: 2, nombre: proceso.revisor_compras, fase_devolucion: "Control Previo Compras" },
+                { id: 3, nombre: proceso.elaborador, fase_devolucion: "Solicitud de Publicación de Necesidad de IFC" },
+                { id: 4, nombre: proceso.revisor_compras, fase_devolucion: "Publicación de Necesidad de IFC" },
+                { id: 5, nombre: proceso.elaborador, fase_devolucion: "Cuadro Comparativo" },
+                { id: 6, nombre: proceso.revisor_compras, fase_devolucion: "Elaboración de Orden de Compra" },
+              ]);
             }
 
             const fasesResponse = await Axios.get(`http://localhost:5000/obtener_fases/${tipo_compra}`);
@@ -256,7 +273,7 @@ import zIndex from "@mui/material/styles/zIndex";
   const handleFormCommentSubmit = async (formData) => {
     const fechaActual = new Date();
     try {
-      if(comentario.trim()==='' || seleccionadoUnidad.label === undefined || destinatario.label === undefined){
+      if(comentario.trim()==='' || seleccionadoUnidad.label === undefined || destinatario === undefined){
         setMensaje('Por favor, ingrese todos los datos.')
         setErrorVisible(true);
         setTimeout(() => setErrorVisible(false), 3000);
@@ -273,7 +290,7 @@ import zIndex from "@mui/material/styles/zIndex";
         { fecha: fechaActual, 
           remitente: username, 
           estado_inicial: proceso.estado, 
-          destinatario:destinatario.label, 
+          destinatario:destinatario, 
           estado_final: estadoNuevo, 
           comentario: comentario, 
           id_infima: id_infima});
@@ -445,13 +462,11 @@ const showFaseConfirm = () => {
 
 const handleInputChangeUnidad = (selectedOption) => {
   setSeleccionadoUnidad(selectedOption); // Actualizar la opción seleccionada
+  const usuarioEncontrado = usuarios.find(usuario => usuario.fase_devolucion === selectedOption.label);
+  setDestinatario(usuarioEncontrado.nombre);
   const inputValue = selectedOption ? selectedOption.value : null;
 };
 
-const handleInputChangeUsuarios = (selectedOption) => {
-  setDestinatario(selectedOption); // Actualizar la opción seleccionada
-  const inputValue = selectedOption ? selectedOption.value : null;
-};
 
   
     return (
@@ -650,13 +665,9 @@ const handleInputChangeUsuarios = (selectedOption) => {
                           Destinatario
                         </label>
                           <Select
-                              value={destinatario}
-                              onChange={handleInputChangeUsuarios}
-                              options={usuarios.map((elemento, index) => ({
-                                  value: index, // Usamos el índice como valor
-                                  label: elemento, // El valor del elemento es la etiqueta
-                              }))}
-                              placeholder="Selecciona una opción..."
+                              isDisabled={true}
+                              value={{ label: destinatario, value: 0 }}
+                              options={[{ label: destinatario, value: 0 }]}
                           />
                       </FormGroup>
                     </Col>
